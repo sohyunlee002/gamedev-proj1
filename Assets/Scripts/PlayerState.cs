@@ -9,8 +9,9 @@ public interface PlayerState
 {
 
     void Enter();
-    void Exit();
+    void FixedUpdate();
     void Update();
+    void Exit();
     PlayerState HandleInput();
 
 }

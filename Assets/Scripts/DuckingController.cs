@@ -7,7 +7,7 @@ public class DuckingController : MonoBehaviour {
     GameObject superMario;
 
 	// Use this for initialization
-	void Start () {
+	void Awake () {
         superMario = GameObject.Find("Super Mario");
 	}
 	
