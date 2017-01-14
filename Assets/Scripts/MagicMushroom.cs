@@ -49,7 +49,6 @@ public class MagicMushroom : Item {
 
     public override void PickUpItem(PlayerController player)
     {
-        Debug.Log("picking up item");
         player.Grow();
         Destroy(gameObject);
     }
@@ -60,12 +59,12 @@ public class MagicMushroom : Item {
         }
     }
 
-    void OnCollisionEnter2D(Collision2D coll) {
+    /*void OnCollisionEnter2D(Collision2D coll) {
         if (coll.collider.tag == "Player") {
             PlayerController player = coll.collider.GetComponent<PlayerController>();
             PickUpItem(player);
         }
-    }
+    }*/
 
     void OnCollisionStay2D(Collision2D coll) {
         onFloor = true;

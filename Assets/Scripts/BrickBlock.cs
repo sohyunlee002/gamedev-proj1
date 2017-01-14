@@ -18,7 +18,6 @@ public class BrickBlock : Block {
 
     protected override void OnCollisionEnter2D(Collision2D coll)
     {
-        Debug.Log(coll.collider.tag);
         if (coll.collider.name == "Super Mario")
         {
             breakBlock = true;

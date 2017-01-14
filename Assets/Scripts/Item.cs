@@ -4,8 +4,6 @@ using UnityEngine;
 
 public abstract class Item : MonoBehaviour{
 
-    //This should be a 'Block' object though.
-    GameObject myBlock;
     protected Rigidbody2D rb;
     protected Collider2D myCollider;
 
@@ -18,12 +16,14 @@ public abstract class Item : MonoBehaviour{
     public abstract void PickUpItem(PlayerController player);
 
     public virtual void Start() {
-        //Set myBlock automatically.
         rb = GetComponent<Rigidbody2D>();
         rb.isKinematic = true;
         rb.freezeRotation = true;
         myCollider = this.GetComponent<Collider2D>();
         myCollider.isTrigger = true;
+        int itemLayer = LayerMask.NameToLayer("Item");
+        int enemyLayer = LayerMask.NameToLayer("Enemy");
+        Physics2D.IgnoreLayerCollision(itemLayer, enemyLayer, true);
     }
 
     public virtual void FixedUpdate() {

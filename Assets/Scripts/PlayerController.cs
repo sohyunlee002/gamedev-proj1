@@ -116,7 +116,6 @@ public class PlayerController : MonoBehaviour {
     public void Grow() {
         //If littleMario turn into superMario.
         //If superMario turn into fireMario.
-        Debug.Log("growing");
         if (little) {
             superMario.SetActive(true);
             littleMario.SetActive(false);
@@ -127,6 +126,39 @@ public class PlayerController : MonoBehaviour {
         //If littleMario then gameOver.
         //If superMario turn into littleMario.
         //If fireMario turn into superMario.
+        if (little)
+        {
+            Debug.Log("Game Over!");
+            //Add other stuff here but for now, just
+            Destroy(this.gameObject);
+        }
+        else if (super) {
+            littleMario.SetActive(true);
+            superMario.SetActive(false);
+        }
+    }
+
+    public void OnCollisionEnter2D(Collision2D coll) {
+        switch (LayerMask.LayerToName(coll.gameObject.layer)) {
+            case "Item":
+                Item item = coll.collider.GetComponent<Item>();
+                item.PickUpItem(this);
+                break;
+            case "Enemy":
+                Debug.Log(coll.collider.tag);
+                //On top collider: kill enemy
+                //Anywhere else: Mario takes damage
+                Enemy enemy = coll.transform.parent.GetComponentInChildren<Enemy>();
+                if (coll.collider.tag == "Enemy_Top")
+                {
+                    enemy.HitByPlayer(this);
+                }
+                else
+                {
+                    enemy.HitPlayer(this);
+                }
+                break;
+        }
     }
 
     private class Grounded : PlayerState
