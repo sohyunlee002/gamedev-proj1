@@ -1,11 +1,13 @@
 fileFormatVersion: 2
-guid: fe9897efedb7fde44aa0853c815d4a09
-timeCreated: 1484101581
+guid: acd891fa8cf2e604197e04dce609bb20
+timeCreated: 1484448364
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
-    21300000: SMB_World1-1BG_0
-    21300002: SMB_World1-1BG_1
+    21300000: NES - Super Mario Bros - Time Up Game Over Screens and Text_0
+    21300002: NES - Super Mario Bros - Time Up Game Over Screens and Text_1
+    21300004: NES - Super Mario Bros - Time Up Game Over Screens and Text_2
+    21300006: NES - Super Mario Bros - Time Up Game Over Screens and Text_3
   serializedVersion: 4
   mipmaps:
     mipMapMode: 0
@@ -72,28 +74,54 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: SMB_World1-1BG_0
+      name: NES - Super Mario Bros - Time Up Game Over Screens and Text_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 248
-        width: 3584
-        height: 232
-      alignment: 6
-      pivot: {x: 0, y: 0}
+        x: 3
+        y: 259
+        width: 256
+        height: 224
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: SMB_World1-1BG_1
+      name: NES - Super Mario Bros - Time Up Game Over Screens and Text_1
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 3584
-        height: 240
+        x: 261
+        y: 259
+        width: 256
+        height: 224
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: NES - Super Mario Bros - Time Up Game Over Screens and Text_2
+      rect:
+        serializedVersion: 2
+        x: 3
+        y: 31
+        width: 256
+        height: 224
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: NES - Super Mario Bros - Time Up Game Over Screens and Text_3
+      rect:
+        serializedVersion: 2
+        x: 261
+        y: 31
+        width: 256
+        height: 224
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       tessellationDetail: 0
