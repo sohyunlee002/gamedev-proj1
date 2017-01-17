@@ -10,6 +10,7 @@ public abstract class Enemy : MonoBehaviour {
     protected float walkingSpeed = 5;
     protected float timeToDeath = 0.5f;
     protected bool dead = false;
+    protected int scoreValue;
 
     // Use this for initialization
     public virtual void Start () {
@@ -22,6 +23,11 @@ public abstract class Enemy : MonoBehaviour {
     public virtual void FixedUpdate () {
 		
 	}
+
+    public int GetScore()
+    {
+        return scoreValue;
+    }
 
     public abstract void HitByPlayer(PlayerController player);
     public abstract void HitPlayer(PlayerController player);

@@ -13,6 +13,7 @@ public class MagicMushroom : Item {
     public override void Start()
     {
         base.Start();
+        myType = "Magic Mushroom";
         activatedPosition = transform.position;
         activatedPosition.y = activatedPosition.y + 1;
     }
@@ -53,18 +54,13 @@ public class MagicMushroom : Item {
         Destroy(gameObject);
     }
 
-    void OnTriggerEnter2D(Collider2D other) {
-        if (other.gameObject.tag == "Player") {
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.gameObject.tag == "Player")
+        {
             activated = true;
         }
     }
-
-    /*void OnCollisionEnter2D(Collision2D coll) {
-        if (coll.collider.tag == "Player") {
-            PlayerController player = coll.collider.GetComponent<PlayerController>();
-            PickUpItem(player);
-        }
-    }*/
 
     void OnCollisionStay2D(Collision2D coll) {
         onFloor = true;

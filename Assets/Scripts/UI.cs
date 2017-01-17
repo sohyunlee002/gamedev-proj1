@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEditor;
 using UnityEngine.SceneManagement;
 using System.Linq;
 
@@ -19,12 +18,17 @@ public class UI : MonoBehaviour {
     GameObject Timer;
     List<Image> TimerDigits = new List<Image>();
     int TimerPlaces = 3;
+    Animator coinAnim;
     string pathToSprites = "NES - Super Mario Bros - Font(Transparent)";
     public Object assetTest;
     Sprite[] numberSprites;
-    int exampleScore = 100;
     bool loaded = true;
     float loadTime = 0;
+    int playerLives = 1;
+    int playerScore = 0;
+    int playerTime = 330;
+    int playerCoins = 0;
+    float timeIncrement = 1;
 
     // Use this for initialization
     void Start()
@@ -47,13 +51,15 @@ public class UI : MonoBehaviour {
         {
             TimerDigits.Add(child.GetComponent<Image>());
         }
-        SetDigits(ScoreDigits, ScorePlaces, 0);
-        SetDigits(CoinsDigits, CoinsPlaces, 0);
-        SetDigits(TimerDigits, TimerPlaces, 0);
-        SetDigits(new List<Image>() { LoadingLives }, 1, 3);
+        SetDigits(ScoreDigits, ScorePlaces, playerScore);
+        SetDigits(CoinsDigits, CoinsPlaces, playerCoins);
+        SetDigits(TimerDigits, TimerPlaces, playerTime);
+        SetDigits(new List<Image>() { LoadingLives }, 1, playerLives);
         LoadingBackground.gameObject.SetActive(false);
         LoadingLives.gameObject.SetActive(false);
         LoadScene();
+        coinAnim = GameObject.Find("Coin Sprite").GetComponent<Animator>();
+        coinAnim.enabled = false;
     }
 	
 	// Update is called once per frame
@@ -68,6 +74,11 @@ public class UI : MonoBehaviour {
             loaded = true;
             LoadingBackground.gameObject.SetActive(false);
             LoadingLives.gameObject.SetActive(false);
+            coinAnim.enabled = true;
+        }
+        else
+        {
+            KeepTime();
         }
     }
 
@@ -104,5 +115,42 @@ public class UI : MonoBehaviour {
         LoadingBackground.gameObject.SetActive(true);
         LoadingLives.gameObject.SetActive(true);
         loadTime = 1.5f;
+    }
+
+    public void ReloadScene()
+    {
+        playerTime = 330;
+        SetDigits(TimerDigits, TimerPlaces, playerTime);
+        LoadScene();
+    }
+
+    public void UpdateScore(int scoreToAdd) {
+        playerScore += scoreToAdd;
+        SetDigits(ScoreDigits, ScorePlaces, playerScore);
+    }
+
+    void KeepTime() {
+        timeIncrement -= Time.deltaTime;
+        if (timeIncrement <= 0) {
+            playerTime -= 1;
+            SetDigits(TimerDigits, TimerPlaces, playerTime);
+            timeIncrement = 1;
+        }
+    }
+
+    public void TakeLife() {
+        playerLives -= 1;
+        SetDigits(new List<Image>() { LoadingLives }, 1, playerLives);
+        if (playerLives == 0) {
+            //Do game over scene and back to Menu Scene?
+            SceneManager.LoadScene("Menu Scene");
+            Destroy(this.gameObject);
+        }
+        ReloadScene();
+    }
+
+    public void AddCoin() {
+        playerCoins += 1;
+        SetDigits(CoinsDigits, CoinsPlaces, playerCoins);
     }
 }

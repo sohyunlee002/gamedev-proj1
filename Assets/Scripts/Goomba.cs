@@ -11,6 +11,7 @@ public class Goomba : Enemy {
         base.Start();
         currentSpeed = new Vector3(walkingSpeed, 0);
         rb.velocity = currentSpeed;
+        scoreValue = 100;
     }
 
 	// Update is called once per frame

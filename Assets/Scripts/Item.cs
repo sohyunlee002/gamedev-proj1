@@ -6,6 +6,8 @@ public abstract class Item : MonoBehaviour{
 
     protected Rigidbody2D rb;
     protected Collider2D myCollider;
+    protected int scoreValue = 0;
+    protected string myType;
 
     public bool activated = false;
 
@@ -30,4 +32,14 @@ public abstract class Item : MonoBehaviour{
         ItemBehavior();
         //rb.AddForce(new Vector3(0, -300));
     }
+
+    public int GetScore()
+    {
+        return scoreValue;
+    }
+
+    public string GetType()
+    {
+        return myType;
+    } 
 }
