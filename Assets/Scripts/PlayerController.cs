@@ -69,18 +69,12 @@ public class PlayerController : MonoBehaviour {
         Debug.Log(rb.velocity.x);
         anim.SetFloat("Speed", Mathf.Abs(rb.velocity.x));
         anim.SetFloat("vSpeed", Mathf.Abs(rb.velocity.y));
-        /*if (Mathf.Abs(rb.velocity.x) <= 5 && Mathf.Abs(rb.velocity.x) >= 0.01)
-        {
-            rb.AddForce(new Vector3(-2 * rb.velocity.x, 0));
-        }*/
         if (moveX < 0 && facingRight)
         {
-            rb.AddForce(new Vector3(-25 * rb.velocity.x, 0));
             Flip();
         }
         else if (moveX > 0 && !facingRight)
         {
-            rb.AddForce(new Vector3(-25 * rb.velocity.x, 0));
             Flip();
         }
         myState.FixedUpdate();
@@ -100,6 +94,7 @@ public class PlayerController : MonoBehaviour {
         Vector3 scale = this.gameObject.transform.localScale;
         scale.x = scale.x * -1;
         this.gameObject.transform.localScale = scale;
+        rb.AddForce(new Vector3(-25 * rb.velocity.x, 0));
     }
 
     bool CheckForGround() {
@@ -203,7 +198,7 @@ public class PlayerController : MonoBehaviour {
 
         public void Update()
         {
-            moveX = moveX = Input.GetAxis("Horizontal");
+            moveX = Input.GetAxis("Horizontal");
             //Debug.Log(moveX);
             if (Input.GetKey(KeyCode.S))
             {
@@ -295,8 +290,6 @@ public class PlayerController : MonoBehaviour {
         {
             //Jumping timer
             jumpingTime -= Time.deltaTime;
-            //Extra gravity
-            rb.AddForce(new Vector2(0, -30));
             //Control in the air
             if (Mathf.Abs(rb.velocity.x) <= controller.maxSpeed)
             {
@@ -306,6 +299,7 @@ public class PlayerController : MonoBehaviour {
             {
                 rb.AddForce(new Vector2(0, 13));
             }
+            //Continuously check that you haven't hit the ground.
             if (controller.CheckForGround())
             {
                 controller.stateEnded = true;
