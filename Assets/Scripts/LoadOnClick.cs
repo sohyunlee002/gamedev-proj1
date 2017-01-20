@@ -10,7 +10,7 @@ public class LoadOnClick : MonoBehaviour {
     GameObject Title_Screen;
 
     public void Start() {
-        //Screen.SetResolution(256, 240, true, 60);
+        SceneManager.UnloadSceneAsync("Main Scene");
         UI_Canvas = GameObject.Find("UI_Canvas");
         Title_Screen = GameObject.Find("Title Screen");
         DontDestroyOnLoad(UI_Canvas);

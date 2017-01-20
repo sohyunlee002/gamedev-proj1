@@ -16,19 +16,34 @@ public class MysteryBlock : Block
 
     protected override void FixedUpdate()
     {
-        base.FixedUpdate();
-        if (transform.parent.position == downPosition && blockHit)
+        if (!blockHit)
         {
-            anim.SetBool("BlockHit", true);
+            float step = Time.deltaTime * speed;
+            if (moveUp)
+            {
+                transform.parent.position = Vector3.MoveTowards(transform.parent.position, upPosition, step);
+            }
+            if (transform.parent.position == upPosition)
+            {
+                moveUp = false;
+                moveDown = true;
+            }
+            if (moveDown)
+            {
+                transform.parent.position = Vector3.MoveTowards(transform.parent.position, downPosition, step);
+                if (transform.parent.position == downPosition)
+                {
+                    moveDown = false;
+                    blockHit = true;
+                    anim.SetBool("BlockHit", blockHit);
+                }
+            }
         }
     }
 
     protected override void OnCollisionEnter2D(Collision2D coll)
     {
         base.OnCollisionEnter2D(coll);
-        if (!blockHit) {
-            blockHit = true;
-        }
     }
 
 }

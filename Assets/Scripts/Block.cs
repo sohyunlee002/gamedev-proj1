@@ -32,10 +32,10 @@ public abstract class Block : MonoBehaviour {
         if (moveDown)
         {
             transform.parent.position = Vector3.MoveTowards(transform.parent.position, downPosition, step);
-        }
-        if (transform.parent.position == downPosition)
-        {
-            moveDown = false;
+            if (transform.parent.position == downPosition)
+            {
+                moveDown = false;
+            }
         }
     }
 

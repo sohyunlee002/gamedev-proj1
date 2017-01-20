@@ -24,7 +24,7 @@ public class UI : MonoBehaviour {
     Sprite[] numberSprites;
     bool loaded = true;
     float loadTime = 0;
-    int playerLives = 1;
+    int playerLives = 3;
     int playerScore = 0;
     int playerTime = 330;
     int playerCoins = 0;
