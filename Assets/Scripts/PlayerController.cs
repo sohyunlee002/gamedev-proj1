@@ -66,7 +66,6 @@ public class PlayerController : MonoBehaviour {
     }
 
     void FixedUpdate() {
-        Debug.Log(rb.velocity.x);
         anim.SetFloat("Speed", Mathf.Abs(rb.velocity.x));
         anim.SetFloat("vSpeed", Mathf.Abs(rb.velocity.y));
         if (moveX < 0 && facingRight)
@@ -98,9 +97,9 @@ public class PlayerController : MonoBehaviour {
     }
 
     bool CheckForGround() {
-        Vector2 origin = new Vector2(rb.position.x + 0.5f, rb.position.y + 1);
-        RaycastHit2D hit = Physics2D.Raycast(origin, Vector2.down, 1.2f, whatIsGround);
-        Debug.DrawRay(origin, Vector2.down * 1.2f);
+        Vector3 origin = new Vector3(rb.position.x + 0.5f, rb.position.y + 0.25f);
+        RaycastHit2D hit = Physics2D.Raycast(origin, Vector3.down, 0.5f, whatIsGround);
+        Debug.DrawRay(origin, Vector3.down * 0.5f);
         return hit.collider != null;
     }
 
@@ -151,7 +150,6 @@ public class PlayerController : MonoBehaviour {
                 ui.UpdateScore(item.GetScore());
                 break;
             case "Enemy":
-                Debug.Log(coll.collider.tag);
                 //On top collider: kill enemy
                 //Anywhere else: Mario takes damage
                 Enemy enemy = coll.transform.parent.GetComponentInChildren<Enemy>();
@@ -175,82 +173,83 @@ public class PlayerController : MonoBehaviour {
         Rigidbody2D rb;
         Animator anim;
         float moveX;
+        float moveJump;
         float maxSpeed;
         float groundAcceleration;
-        bool jump;
-        bool fall;
-        
+
         public Grounded(PlayerController controller) {
             this.controller = controller;
             this.rb = controller.rb;
             this.anim = controller.anim;
             this.moveX = controller.moveX;
+            this.moveJump = controller.moveJump;
             this.maxSpeed = controller.maxSpeed;
             this.groundAcceleration = controller.groundAcceleration;
-            
+
         }
 
         public void Enter()
         {
             moveX = Input.GetAxis("Horizontal");
+            moveJump = Input.GetAxis("Vertical");
             anim.SetBool("Grounded", true);
         }
 
         public void Update()
         {
             moveX = Input.GetAxis("Horizontal");
-            //Debug.Log(moveX);
-            if (Input.GetKey(KeyCode.S))
+            moveJump = Input.GetAxis("Vertical");
+            if (Input.GetButton("Vertical") && controller.super)
             {
-                controller.Duck();   
+                controller.Duck();
             }
         }
 
         public void FixedUpdate() {
-            //rb.velocity = new Vector2(moveX * speed, rb.velocity.y);
+            //rb.velocity = new Vector3(moveX * speed, rb.velocity.y);
             if(Mathf.Abs(rb.velocity.magnitude) <= maxSpeed)
             {
-                rb.AddForce(new Vector2(groundAcceleration * moveX, 0));
+                rb.AddForce(new Vector3(groundAcceleration * moveX, 0));
             }
             //Check if falling. Pause animation at current frame
             //and add the extra gravity.
             if (Mathf.Abs(rb.velocity.y) > 0)
             {
-                fall = true;
-                //rb.AddForce(new Vector2(0, -30));
                 controller.stateEnded = true;
             }
         }
 
         public void Exit()
         {
-            if (jump)
+            /*Determine the animation state. */
+            if (Input.GetButton("Jump"))
             {
-                anim.SetBool("Grounded", false);
+              rb.AddForce(new Vector3(0, moveJump * jumpForce));
+              anim.SetBool("Grounded", false);
+              anim.SetBool("Jumping", true);
             }
-            else if (fall)
+            else
             {
                 anim.enabled = false;
             }
-            
+
         }
 
         public PlayerState HandleInput()
         {
             //controller.anim.SetBool("Grounded", false);
-            if (Input.GetKey(KeyCode.Space))
+            if (Input.GetButton("Jump") || controller.stateEnded)
             {
-                jump = true;
-                return new Jumping(controller);
+                return new InAir(controller);
             }
-            else if (fall) {
-                return new Jumping(controller);
+            else
+            {
+                return null;
             }
-            return null;
         }
     }
 
-    private class Jumping : PlayerState
+    private class InAir : PlayerState
     {
 
         PlayerController controller;
@@ -258,10 +257,9 @@ public class PlayerController : MonoBehaviour {
         Animator anim;
         float moveX;
         float moveJump;
-        float jumpForce;
-        float jumpingTime = 1;
+        float jumpingTime;
 
-        public Jumping(PlayerController controller)
+        public InAir(PlayerController controller)
         {
             this.controller = controller;
             this.rb = controller.rb;
@@ -269,15 +267,23 @@ public class PlayerController : MonoBehaviour {
             this.moveX = controller.moveX;
             this.moveJump = controller.moveJump;
             this.jumpForce = controller.jumpForce;
+            if(Input.GetButton("Jump"))
+            {
+              jumpingTime = 1;
+            }
+            else
+            {
+              jumpingTime = 0;
+            }
         }
 
         public void Enter()
         {
             moveJump = Input.GetAxis("Jump");
             moveX = Input.GetAxis("Horizontal");
-            //Add preliminary jump force
-            rb.AddForce(new Vector2(0, moveJump * jumpForce));
-            anim.SetBool("Jumping", true);
+            //This only adds force based on the value of
+            //moveJump - which should be zero if its not
+            //pressed.
         }
 
         public void Update()
@@ -293,11 +299,11 @@ public class PlayerController : MonoBehaviour {
             //Control in the air
             if (Mathf.Abs(rb.velocity.x) <= controller.maxSpeed)
             {
-                rb.AddForce(new Vector2(moveX * 5, 0));
+                rb.AddForce(new Vector3(moveX * 5, 0));
             }
-            if (jumpingTime >= 0 && Input.GetKey(KeyCode.Space))
+            if (jumpingTime >= 0 && Input.GetButton("Jump"))
             {
-                rb.AddForce(new Vector2(0, 13));
+                rb.AddForce(new Vector3(0, 13));
             }
             //Continuously check that you haven't hit the ground.
             if (controller.CheckForGround())
@@ -310,6 +316,7 @@ public class PlayerController : MonoBehaviour {
         {
             anim.enabled = true;
             anim.SetBool("Jumping", false);
+            rb.velocity = new Vector3(rb.velocity.x, 0);
         }
 
         public PlayerState HandleInput()
@@ -318,7 +325,8 @@ public class PlayerController : MonoBehaviour {
             {
                 return new Grounded(controller);
             }
-            else {
+            else
+            {
                 return null;
             }
         }
