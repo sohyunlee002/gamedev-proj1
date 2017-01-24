@@ -174,6 +174,7 @@ public class PlayerController : MonoBehaviour {
         Animator anim;
         float moveX;
         float moveJump;
+        float jumpForce;
         float maxSpeed;
         float groundAcceleration;
 
@@ -183,6 +184,7 @@ public class PlayerController : MonoBehaviour {
             this.anim = controller.anim;
             this.moveX = controller.moveX;
             this.moveJump = controller.moveJump;
+            this.jumpForce = controller.jumpForce;
             this.maxSpeed = controller.maxSpeed;
             this.groundAcceleration = controller.groundAcceleration;
 
@@ -191,14 +193,14 @@ public class PlayerController : MonoBehaviour {
         public void Enter()
         {
             moveX = Input.GetAxis("Horizontal");
-            moveJump = Input.GetAxis("Vertical");
+            moveJump = Input.GetAxis("Jump");
             anim.SetBool("Grounded", true);
         }
 
         public void Update()
         {
             moveX = Input.GetAxis("Horizontal");
-            moveJump = Input.GetAxis("Vertical");
+            moveJump = Input.GetAxis("Jump");
             if (Input.GetButton("Vertical") && controller.super)
             {
                 controller.Duck();
@@ -224,9 +226,10 @@ public class PlayerController : MonoBehaviour {
             /*Determine the animation state. */
             if (Input.GetButton("Jump"))
             {
-              rb.AddForce(new Vector3(0, moveJump * jumpForce));
-              anim.SetBool("Grounded", false);
-              anim.SetBool("Jumping", true);
+                Debug.Log("jumping");
+                rb.AddForce(new Vector3(0, moveJump * jumpForce));
+                anim.SetBool("Grounded", false);
+                anim.SetBool("Jumping", true);
             }
             else
             {
@@ -266,7 +269,6 @@ public class PlayerController : MonoBehaviour {
             this.anim = controller.anim;
             this.moveX = controller.moveX;
             this.moveJump = controller.moveJump;
-            this.jumpForce = controller.jumpForce;
             if(Input.GetButton("Jump"))
             {
               jumpingTime = 1;
@@ -303,7 +305,7 @@ public class PlayerController : MonoBehaviour {
             }
             if (jumpingTime >= 0 && Input.GetButton("Jump"))
             {
-                rb.AddForce(new Vector3(0, 13));
+                rb.AddForce(new Vector3(0, 15));
             }
             //Continuously check that you haven't hit the ground.
             if (controller.CheckForGround())

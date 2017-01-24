@@ -91,7 +91,6 @@ public class UI : MonoBehaviour {
             int digit = result / (int) (Mathf.Pow(10, placeCounter));
             result = result % (int)(Mathf.Pow(10, placeCounter));
             if (digit >= 10) {
-                Debug.Log("going in here at least");
                 int maxNum = 0;
                 while (placeCounter >= 0) {
                     maxNum += (9 * (int) Mathf.Pow(10, placeCounter));
@@ -101,8 +100,6 @@ public class UI : MonoBehaviour {
                 SetDigits(digits, numberPlaces, maxNum);
                 return;
             }
-            Debug.Log(digit);
-            Debug.Log(digitsEnum.Current.name);
             digitsEnum.Current.sprite = numberSprites[digit];
             digitsEnum.MoveNext();
             placeCounter -= 1;

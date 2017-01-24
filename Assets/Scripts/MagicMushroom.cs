@@ -9,11 +9,11 @@ public class MagicMushroom : Item {
     bool finishedActivation = false;
     bool onFloor = false;
     Vector3 currentSpeed = new Vector3(5, 0);
+    float timeToShow = 0.2f;
 
     public override void Start()
     {
         base.Start();
-        myType = "Magic Mushroom";
         activatedPosition = transform.position;
         activatedPosition.y = activatedPosition.y + 1;
     }
@@ -22,6 +22,11 @@ public class MagicMushroom : Item {
     {
         if (activated)
         {
+            timeToShow -= Time.deltaTime;
+            if (timeToShow <= 0)
+            {
+                mySprite.enabled = true;
+            }
             if (onFloor)
             {
                 if (rb.velocity.magnitude <= 0.1f)
@@ -32,8 +37,6 @@ public class MagicMushroom : Item {
                     rb.velocity = currentSpeed;
                 }
             }
-            //transform.position = Vector3.MoveTowards(transform.localPosition, activatedPosition, activationSpeed);
-            //rb.MovePosition(new Vector2(activatedPosition.x, activatedPosition.y));*/
             if (!finishedActivation) {
                 rb.velocity = new Vector3(0, 2f);
             }
@@ -60,6 +63,7 @@ public class MagicMushroom : Item {
         {
             activated = true;
         }
+        mySprite.enabled = false;
     }
 
     void OnCollisionStay2D(Collision2D coll) {
@@ -68,7 +72,7 @@ public class MagicMushroom : Item {
 
     void OnCollisionExit2D(Collision2D coll) {
         onFloor = false;
-        rb.AddForce(new Vector3(-15, -200));
+        //rb.AddForce(new Vector3(-15, -200));
     }
 
 }

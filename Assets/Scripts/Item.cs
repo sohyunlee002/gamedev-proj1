@@ -6,8 +6,8 @@ public abstract class Item : MonoBehaviour{
 
     protected Rigidbody2D rb;
     protected Collider2D myCollider;
+    protected SpriteRenderer mySprite;
     protected int scoreValue = 0;
-    protected string myType;
 
     public bool activated = false;
 
@@ -23,6 +23,7 @@ public abstract class Item : MonoBehaviour{
         rb.freezeRotation = true;
         myCollider = this.GetComponent<Collider2D>();
         myCollider.isTrigger = true;
+        mySprite = transform.parent.GetComponentInChildren<SpriteRenderer>();
         int itemLayer = LayerMask.NameToLayer("Item");
         int enemyLayer = LayerMask.NameToLayer("Enemy");
         Physics2D.IgnoreLayerCollision(itemLayer, enemyLayer, true);
@@ -30,16 +31,10 @@ public abstract class Item : MonoBehaviour{
 
     public virtual void FixedUpdate() {
         ItemBehavior();
-        //rb.AddForce(new Vector3(0, -300));
     }
 
     public int GetScore()
     {
         return scoreValue;
     }
-
-    public string GetType()
-    {
-        return myType;
-    } 
 }
