@@ -125,7 +125,7 @@ public class PlayerController : MonoBehaviour {
         //If superMario turn into fireMario.
         if (little) {
             superMario.SetActive(true);
-            superMario.transform.position = new Vector3(this.transform.position.x, superMario.transform.position.y);
+            superMario.transform.position = new Vector3(this.transform.position.x, this.transform.position.y);
             littleMario.SetActive(false);
         }
     }
@@ -142,7 +142,7 @@ public class PlayerController : MonoBehaviour {
         }
         else if (super) {
             littleMario.SetActive(true);
-            littleMario.transform.position = new Vector3(this.transform.position.x, littleMario.transform.position.y);
+            littleMario.transform.position = new Vector3(this.transform.position.x, littleMario.transform.position.y + 0.5f);
             superMario.SetActive(false);
         }
     }
@@ -225,7 +225,8 @@ public class PlayerController : MonoBehaviour {
             }*/
             //Check if falling. Pause animation at current frame
             //and add the extra gravity.
-            if (Mathf.Abs(rb.velocity.y) > 0)
+            Debug.Log(rb.velocity.y);
+            if (rb.velocity.y < -0.05f)
             {
                 controller.stateEnded = true;
             }
