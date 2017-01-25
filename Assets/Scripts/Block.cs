@@ -2,47 +2,55 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class Block : MonoBehaviour {
+public class Block : MonoBehaviour {
 
     protected Vector3 upPosition;
     protected Vector3 downPosition;
     protected bool moveUp = false;
     protected bool moveDown = false;
     protected float speed = 5;
+    Animator anim;
 
     protected virtual void Start ()
     {
+        anim = transform.parent.GetComponent<Animator>();
         upPosition = transform.parent.position;
         upPosition.y = upPosition.y + 0.5f;
         downPosition = transform.parent.position;
     }
-	
-	protected virtual void FixedUpdate ()
+
+    protected IEnumerator MoveUpAndDown()
     {
         float step = Time.deltaTime * speed;
-        if (moveUp)
-        {
+        while (transform.parent.position != upPosition) {
             transform.parent.position = Vector3.MoveTowards(transform.parent.position, upPosition, step);
+            yield return null;
         }
-        if (transform.parent.position == upPosition)
-        {
-            moveUp = false;
-            moveDown = true;
-        }
-        if (moveDown)
-        {
+        while (transform.parent.position != downPosition) {
             transform.parent.position = Vector3.MoveTowards(transform.parent.position, downPosition, step);
-            if (transform.parent.position == downPosition)
-            {
-                moveDown = false;
-            }
+            yield return null;
+        }
+    }
+
+    /*Make coroutine for moving block up and down.*/
+
+    protected virtual void HitByPlayer(GameObject player)
+    {
+        if (player.name == "Super Mario")
+        {
+            //Play animation for breaking here.
+            transform.parent.gameObject.SetActive(false);
+        }
+        else
+        {
+            StartCoroutine("MoveUpAndDown");
         }
     }
 
     protected virtual void OnCollisionEnter2D(Collision2D coll)
     {
         if (coll.collider.tag == "Player") {
-            moveUp = true;
+            HitByPlayer(coll.collider.gameObject);
         }
     }
 

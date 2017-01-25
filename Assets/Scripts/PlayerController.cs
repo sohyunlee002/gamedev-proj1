@@ -25,6 +25,7 @@ public class PlayerController : MonoBehaviour {
     UI ui;
     bool super;
     bool little;
+    float castHeight;
 
     //Awake is called before any Start function
     void Awake() {
@@ -97,9 +98,11 @@ public class PlayerController : MonoBehaviour {
     }
 
     bool CheckForGround() {
-        Vector3 origin = new Vector3(rb.position.x + 0.5f, rb.position.y + 0.25f);
-        RaycastHit2D hit = Physics2D.Raycast(origin, Vector3.down, 0.5f, whatIsGround);
-        Debug.DrawRay(origin, Vector3.down * 0.5f);
+        SpriteRenderer mySprite = GetComponent<SpriteRenderer>();
+        castHeight = mySprite.sprite.bounds.size.y / 2 + 0.25f;
+        Vector3 origin = new Vector3(transform.position.x, transform.position.y);
+        RaycastHit2D hit = Physics2D.Raycast(origin, Vector3.down, castHeight, whatIsGround);
+        Debug.DrawRay(origin, Vector3.down * castHeight);
         return hit.collider != null;
     }
 
@@ -122,6 +125,7 @@ public class PlayerController : MonoBehaviour {
         //If superMario turn into fireMario.
         if (little) {
             superMario.SetActive(true);
+            superMario.transform.position = new Vector3(this.transform.position.x, superMario.transform.position.y);
             littleMario.SetActive(false);
         }
     }
@@ -138,12 +142,14 @@ public class PlayerController : MonoBehaviour {
         }
         else if (super) {
             littleMario.SetActive(true);
+            littleMario.transform.position = new Vector3(this.transform.position.x, littleMario.transform.position.y);
             superMario.SetActive(false);
         }
     }
 
     public void OnCollisionEnter2D(Collision2D coll) {
-        switch (LayerMask.LayerToName(coll.gameObject.layer)) {
+        switch (LayerMask.LayerToName(coll.gameObject.layer))
+        {
             case "Item":
                 Item item = coll.collider.GetComponent<Item>();
                 item.PickUpItem(this);
@@ -208,11 +214,15 @@ public class PlayerController : MonoBehaviour {
         }
 
         public void FixedUpdate() {
-            //rb.velocity = new Vector3(moveX * speed, rb.velocity.y);
             if(Mathf.Abs(rb.velocity.magnitude) <= maxSpeed)
             {
                 rb.AddForce(new Vector3(groundAcceleration * moveX, 0));
             }
+            /*if (Mathf.Abs(rb.velocity.x) <= 3)
+            {
+                Debug.Log("falling slowly");
+                rb.velocity = Vector3.zero;
+            }*/
             //Check if falling. Pause animation at current frame
             //and add the extra gravity.
             if (Mathf.Abs(rb.velocity.y) > 0)
@@ -226,7 +236,6 @@ public class PlayerController : MonoBehaviour {
             /*Determine the animation state. */
             if (Input.GetButton("Jump"))
             {
-                Debug.Log("jumping");
                 rb.AddForce(new Vector3(0, moveJump * jumpForce));
                 anim.SetBool("Grounded", false);
                 anim.SetBool("Jumping", true);
@@ -261,6 +270,8 @@ public class PlayerController : MonoBehaviour {
         float moveX;
         float moveJump;
         float jumpingTime;
+        float airHorizAcceleration;
+        float airVerticalAcceleration;
 
         public InAir(PlayerController controller)
         {
