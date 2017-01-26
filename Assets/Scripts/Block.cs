@@ -9,7 +9,7 @@ public class Block : MonoBehaviour {
     protected bool moveUp = false;
     protected bool moveDown = false;
     protected float speed = 5;
-    Animator anim;
+    protected Animator anim;
 
     protected virtual void Start ()
     {

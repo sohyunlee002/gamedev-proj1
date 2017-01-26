@@ -14,8 +14,6 @@ public class PlayerController : MonoBehaviour {
     bool facingRight = true;
     Rigidbody2D rb;
     Animator anim;
-    bool grounded = true;
-    float jumpingTime = 1;
     PlayerState myState;
     PlayerState nextState;
     bool stateEnded;
@@ -59,6 +57,7 @@ public class PlayerController : MonoBehaviour {
     // Update is called once per frame
     void Update () {
         moveX = Input.GetAxis("Horizontal");
+        moveJump = Input.GetAxis("Jump");
         myState.Update();
         if (Input.anyKeyDown || stateEnded)
         {
@@ -125,7 +124,7 @@ public class PlayerController : MonoBehaviour {
         //If superMario turn into fireMario.
         if (little) {
             superMario.SetActive(true);
-            superMario.transform.position = new Vector3(this.transform.position.x, this.transform.position.y);
+            superMario.transform.position = new Vector3(this.transform.position.x, superMario.transform.position.y);
             littleMario.SetActive(false);
         }
     }
@@ -142,7 +141,7 @@ public class PlayerController : MonoBehaviour {
         }
         else if (super) {
             littleMario.SetActive(true);
-            littleMario.transform.position = new Vector3(this.transform.position.x, littleMario.transform.position.y + 0.5f);
+            littleMario.transform.position = new Vector3(this.transform.position.x, littleMario.transform.position.y);
             superMario.SetActive(false);
         }
     }
@@ -225,8 +224,7 @@ public class PlayerController : MonoBehaviour {
             }*/
             //Check if falling. Pause animation at current frame
             //and add the extra gravity.
-            Debug.Log(rb.velocity.y);
-            if (rb.velocity.y < -0.05f)
+            if (rb.velocity.y < -2)
             {
                 controller.stateEnded = true;
             }
@@ -315,9 +313,9 @@ public class PlayerController : MonoBehaviour {
             {
                 rb.AddForce(new Vector3(moveX * 5, 0));
             }
-            if (jumpingTime >= 0 && Input.GetButton("Jump"))
+            if (jumpingTime >= 0)
             {
-                rb.AddForce(new Vector3(0, 15));
+                rb.AddForce(new Vector3(0, moveJump * 15));
             }
             //Continuously check that you haven't hit the ground.
             if (controller.CheckForGround())

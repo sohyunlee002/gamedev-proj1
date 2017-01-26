@@ -5,14 +5,7 @@ using UnityEngine;
 public class MysteryBlock : Block
 {
 
-    Animator anim;
     bool blockHit = false;
-
-    protected override void Start()
-    {
-        base.Start();
-        anim = transform.parent.GetComponent<Animator>();
-    }
 
     IEnumerator TurnUnbreakable()
     {

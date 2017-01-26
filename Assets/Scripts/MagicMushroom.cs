@@ -6,10 +6,8 @@ using UnityEngine;
 public class MagicMushroom : Item {
 
     Vector3 activatedPosition;
-    bool finishedActivation = false;
-    bool onFloor = false;
     Vector3 currentSpeed = new Vector3(5, 0);
-    float timeToShow = 0.2f;
+    float timeToHide = 0.2f;
 
     public override void Start()
     {
@@ -42,10 +40,8 @@ public class MagicMushroom : Item {
             rb.velocity = new Vector3(0, 2f);
             yield return null;
         }
-        Debug.Log("When does this all get called?");
         rb.velocity = Vector3.zero;
         myCollider.isTrigger = false;
-        finishedActivation = true;
         rb.isKinematic = false;
         rb.velocity = currentSpeed;
         activated = true;
@@ -55,7 +51,7 @@ public class MagicMushroom : Item {
     IEnumerator ShowAndHide()
     {
         mySprite.enabled = false;
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSeconds(timeToHide);
         mySprite.enabled = true;
         yield break;
     }
@@ -73,15 +69,6 @@ public class MagicMushroom : Item {
             StartCoroutine("Activate");
             StartCoroutine("ShowAndHide");
         }
-    }
-
-    void OnCollisionStay2D(Collision2D coll) {
-        onFloor = true;
-    }
-
-    void OnCollisionExit2D(Collision2D coll) {
-        onFloor = false;
-        //rb.AddForce(new Vector3(-15, -200));
     }
 
 }
