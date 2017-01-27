@@ -23,7 +23,6 @@ public class PlayerController : MonoBehaviour {
     UI ui;
     bool super;
     bool little;
-    float castHeight;
 
     //Awake is called before any Start function
     void Awake() {
@@ -98,7 +97,7 @@ public class PlayerController : MonoBehaviour {
 
     bool CheckForGround() {
         SpriteRenderer mySprite = GetComponent<SpriteRenderer>();
-        castHeight = mySprite.sprite.bounds.size.y / 2 + 0.25f;
+        float castHeight = mySprite.sprite.bounds.size.y / 2 + 0.25f;
         Vector3 origin = new Vector3(transform.position.x, transform.position.y);
         RaycastHit2D hit = Physics2D.Raycast(origin, Vector3.down, castHeight, whatIsGround);
         Debug.DrawRay(origin, Vector3.down * castHeight);
@@ -206,7 +205,7 @@ public class PlayerController : MonoBehaviour {
         {
             moveX = Input.GetAxis("Horizontal");
             moveJump = Input.GetAxis("Jump");
-            if (Input.GetButton("Vertical") && controller.super)
+            if (Input.GetAxis("Vertical") < -0.01f && controller.super)
             {
                 controller.Duck();
             }
@@ -270,7 +269,7 @@ public class PlayerController : MonoBehaviour {
         float moveJump;
         float jumpingTime;
         float airHorizAcceleration;
-        float airVerticalAcceleration;
+        float airJumpAcceleration;
 
         public InAir(PlayerController controller)
         {
@@ -279,7 +278,9 @@ public class PlayerController : MonoBehaviour {
             this.anim = controller.anim;
             this.moveX = controller.moveX;
             this.moveJump = controller.moveJump;
-            if(Input.GetButton("Jump"))
+            this.airHorizAcceleration = 5;
+            this.airJumpAcceleration = 18;
+            if (Input.GetButton("Jump"))
             {
               jumpingTime = 1;
             }
@@ -311,11 +312,11 @@ public class PlayerController : MonoBehaviour {
             //Control in the air
             if (Mathf.Abs(rb.velocity.x) <= controller.maxSpeed)
             {
-                rb.AddForce(new Vector3(moveX * 5, 0));
+                rb.AddForce(new Vector3(moveX * airHorizAcceleration, 0));
             }
             if (jumpingTime >= 0)
             {
-                rb.AddForce(new Vector3(0, moveJump * 15));
+                rb.AddForce(new Vector3(0, moveJump * airJumpAcceleration));
             }
             //Continuously check that you haven't hit the ground.
             if (controller.CheckForGround())

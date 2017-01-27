@@ -32,8 +32,6 @@ public class Block : MonoBehaviour {
         }
     }
 
-    /*Make coroutine for moving block up and down.*/
-
     protected virtual void HitByPlayer(GameObject player)
     {
         if (player.name == "Super Mario")
