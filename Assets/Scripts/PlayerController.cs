@@ -20,7 +20,7 @@ public class PlayerController : MonoBehaviour {
     GameObject duckingMario;
     GameObject littleMario;
     GameObject superMario;
-    UI ui;
+    //UI ui;
     bool super;
     bool little;
 
@@ -36,7 +36,7 @@ public class PlayerController : MonoBehaviour {
         rb.freezeRotation = true;
         anim = this.gameObject.GetComponent<Animator>();
         myState = new Grounded(this);
-        ui = GameObject.Find("UI_Canvas").GetComponent<UI>();
+        //ui = GameObject.Find("UI_Canvas").GetComponent<UI>();
         if (gameObject.name == "Super Mario")
         {
             super = true;
@@ -136,7 +136,7 @@ public class PlayerController : MonoBehaviour {
         {
             Debug.Log("Game Over!");
             //Add other stuff here but for now, just
-            ui.TakeLife();
+            //ui.TakeLife();
         }
         else if (super) {
             littleMario.SetActive(true);
@@ -151,7 +151,7 @@ public class PlayerController : MonoBehaviour {
             case "Item":
                 Item item = coll.collider.GetComponent<Item>();
                 item.PickUpItem(this);
-                ui.UpdateScore(item.GetScore());
+                //ui.UpdateScore(item.GetScore());
                 break;
             case "Enemy":
                 //On top collider: kill enemy
@@ -160,7 +160,7 @@ public class PlayerController : MonoBehaviour {
                 if (coll.collider.tag == "Enemy_Top")
                 {
                     enemy.HitByPlayer(this);
-                    ui.UpdateScore(enemy.GetScore());
+                    //ui.UpdateScore(enemy.GetScore());
                 }
                 else
                 {
