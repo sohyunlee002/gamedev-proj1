@@ -14,13 +14,11 @@ public class UIManager : MonoBehaviour {
     Image LoadingLives;
     GameObject Score;
     List<Image> ScoreDigits = new List<Image>();
-    int ScorePlaces = 6;
     GameObject Coins;
     List<Image> CoinsDigits = new List<Image>();
-    int CoinsPlaces = 2;
     GameObject Timer;
     List<Image> TimerDigits = new List<Image>();
-    int TimerPlaces = 3;
+    List<Image> LoadingLivesDigit = new List<Image>();
     string pathToSprites = "NES - Super Mario Bros - Font(Transparent)";
     public Object assetTest;
     Sprite[] numberSprites;
@@ -44,6 +42,7 @@ public class UIManager : MonoBehaviour {
         
         LoadingBackground = GameObject.Find("Loading_Background");
         LoadingLives = GameObject.Find("Loading_Lives").GetComponent<Image>();
+        LoadingLivesDigit.Add(LoadingLives);
         numberSprites = Resources.LoadAll(pathToSprites).OfType<Sprite>().Take(10).ToArray();
         Score = GameObject.Find("Score");
         foreach (Transform child in Score.transform)
@@ -60,10 +59,10 @@ public class UIManager : MonoBehaviour {
         {
             TimerDigits.Add(child.GetComponent<Image>());
         }
-        SetDigits(ScoreDigits, ScorePlaces, playerScore);
-        SetDigits(CoinsDigits, CoinsPlaces, playerCoins);
-        SetDigits(TimerDigits, TimerPlaces, playerTime);
-        SetDigits(new List<Image>() { LoadingLives }, 1, playerLives);
+        SetDigits(ScoreDigits, playerScore);
+        SetDigits(CoinsDigits, playerCoins);
+        SetDigits(TimerDigits, playerTime);
+        SetDigits(LoadingLivesDigit, playerLives);
         LoadingBackground.SetActive(false);
     }
 
@@ -80,9 +79,13 @@ public class UIManager : MonoBehaviour {
     // Update is called once per frame
     void Update () {}
 
-    void SetDigits(List<Image> digits, int numberPlaces, int result)
+    void SetDigits(List<Image> digits, int result)
     {
-        int placeCounter = numberPlaces - 1;
+        int placeCounter = 0;
+        while (result / (int) Mathf.Pow(10, placeCounter) > 0) {
+            placeCounter += 1;
+        }
+        placeCounter -= 1;
         IEnumerator<Image> digitsEnum = digits.GetEnumerator();
         digitsEnum.MoveNext();
         while (placeCounter >= 0) {
@@ -94,7 +97,7 @@ public class UIManager : MonoBehaviour {
                     maxNum += (9 * (int) Mathf.Pow(10, placeCounter));
                     placeCounter -= 1;
                 }
-                SetDigits(digits, numberPlaces, maxNum);
+                SetDigits(digits, maxNum);
                 return;
             }
             digitsEnum.Current.sprite = numberSprites[digit];
@@ -106,14 +109,14 @@ public class UIManager : MonoBehaviour {
     public void LoadScene()
     {
         playerTime = 330;
-        SetDigits(TimerDigits, TimerPlaces, playerTime);
+        SetDigits(TimerDigits, playerTime);
         StopCoroutine("KeepTime");
         StartCoroutine("ShowLoadingScreen");
     }
 
     public void UpdateScore(int scoreToAdd) {
         playerScore += scoreToAdd;
-        SetDigits(ScoreDigits, ScorePlaces, playerScore);
+        SetDigits(ScoreDigits, playerScore);
     }
 
     IEnumerator KeepTime() {
@@ -121,7 +124,7 @@ public class UIManager : MonoBehaviour {
         {
             yield return new WaitForSeconds(1);
             playerTime -= 1;
-            SetDigits(TimerDigits, TimerPlaces, playerTime);
+            SetDigits(TimerDigits, playerTime);
         }
         TakeLife();
         LoadScene();
@@ -130,7 +133,7 @@ public class UIManager : MonoBehaviour {
 
     public void TakeLife() {
         playerLives -= 1;
-        SetDigits(new List<Image>() { LoadingLives }, 1, playerLives);
+        SetDigits(LoadingLivesDigit, playerLives);
         if (playerLives == 0)
         {
             //Do game over scene and back to Menu Scene?
@@ -145,6 +148,6 @@ public class UIManager : MonoBehaviour {
 
     public void AddCoin() {
         playerCoins += 1;
-        SetDigits(CoinsDigits, CoinsPlaces, playerCoins);
+        SetDigits(CoinsDigits, playerCoins);
     }
 }
