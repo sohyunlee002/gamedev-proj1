@@ -21,7 +21,6 @@ public class UIManager : MonoBehaviour {
     GameObject Timer;
     List<Image> TimerDigits = new List<Image>();
     int TimerPlaces = 3;
-    Animator coinAnim;
     string pathToSprites = "NES - Super Mario Bros - Font(Transparent)";
     public Object assetTest;
     Sprite[] numberSprites;
@@ -30,12 +29,19 @@ public class UIManager : MonoBehaviour {
     int playerScore = 0;
     int playerTime = 330;
     int playerCoins = 0;
-    float timeIncrement = 1;
 
     // Use this for initialization
     void Start()
     {
-        uiManager = this;
+        if (uiManager == null)
+        {
+            uiManager = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+        
         LoadingBackground = GameObject.Find("Loading_Background");
         LoadingLives = GameObject.Find("Loading_Lives").GetComponent<Image>();
         numberSprites = Resources.LoadAll(pathToSprites).OfType<Sprite>().Take(10).ToArray();
@@ -59,8 +65,6 @@ public class UIManager : MonoBehaviour {
         SetDigits(TimerDigits, TimerPlaces, playerTime);
         SetDigits(new List<Image>() { LoadingLives }, 1, playerLives);
         LoadingBackground.SetActive(false);
-        coinAnim = GameObject.Find("Coin Sprite").GetComponent<Animator>();
-        //coinAnim.enabled = false;
     }
 
     /* Use coroutine for spending time on Loading screen. */
@@ -89,7 +93,6 @@ public class UIManager : MonoBehaviour {
                 while (placeCounter >= 0) {
                     maxNum += (9 * (int) Mathf.Pow(10, placeCounter));
                     placeCounter -= 1;
-                    Debug.Log(maxNum);
                 }
                 SetDigits(digits, numberPlaces, maxNum);
                 return;
@@ -104,6 +107,7 @@ public class UIManager : MonoBehaviour {
     {
         playerTime = 330;
         SetDigits(TimerDigits, TimerPlaces, playerTime);
+        StopCoroutine("KeepTime");
         StartCoroutine("ShowLoadingScreen");
     }
 
@@ -127,10 +131,15 @@ public class UIManager : MonoBehaviour {
     public void TakeLife() {
         playerLives -= 1;
         SetDigits(new List<Image>() { LoadingLives }, 1, playerLives);
-        if (playerLives == 0) {
+        if (playerLives == 0)
+        {
             //Do game over scene and back to Menu Scene?
             SceneManager.LoadScene("Menu Scene");
-            Destroy(this.gameObject);
+            playerLives = 3;
+        }
+        else
+        {
+            LoadScene();
         }
     }
 

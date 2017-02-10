@@ -56,9 +56,6 @@ public class PlayerController : MonoBehaviour {
 
     // Update is called once per frame
     void Update () {
-        /*while (ui == null) {
-            ui = GameObject.Find("UI_Canvas").GetComponent<UI>();
-        }*/
         moveX = Input.GetAxis("Horizontal");
         moveJump = Input.GetAxis("Jump");
         myState.Update();
@@ -138,9 +135,8 @@ public class PlayerController : MonoBehaviour {
         //If fireMario turn into superMario.
         if (little)
         {
-            Debug.Log("Game Over!");
-            //Add other stuff here but for now, just
             uiManager.TakeLife();
+            this.gameObject.SetActive(false);
         }
         else if (super) {
             littleMario.SetActive(true);
@@ -209,7 +205,7 @@ public class PlayerController : MonoBehaviour {
         {
             moveX = Input.GetAxis("Horizontal");
             moveJump = Input.GetAxis("Jump");
-            if (Input.GetAxis("Vertical") < -0.01f && controller.super)
+            if (Input.GetButton("Vertical") && Input.GetAxis("Vertical") < -0.01f && controller.super)
             {
                 controller.Duck();
             }
