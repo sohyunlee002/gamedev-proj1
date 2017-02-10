@@ -6,15 +6,14 @@ public class CameraController : MonoBehaviour {
 
     GameObject player;
     Camera myCam;
+    Vector3 cameraCenter;
 	// Use this for initialization
 	void Start () {
         player = GameObject.Find("MarioHolder");
         myCam = GetComponent<Camera>();
         Vector3 cameraBottomLeft = myCam.ScreenToWorldPoint(new Vector3(0, 0));
-        Vector3 cameraCenter = myCam.ViewportToWorldPoint(new Vector3(0.5f, 0.5f));
-        Debug.Log(cameraBottomLeft);
+        cameraCenter = myCam.ViewportToWorldPoint(new Vector3(0.5f, 0.5f));
         float distanceFromZero = 0 - cameraBottomLeft.x;
-        Debug.Log(distanceFromZero);
         cameraCenter.x += distanceFromZero;
         gameObject.transform.position = cameraCenter;
 	}
@@ -22,7 +21,7 @@ public class CameraController : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
         Vector3 myPos = gameObject.transform.position;
-        if (player.transform.position.x > myCam.ViewportToWorldPoint(new Vector3(0.5f, 0.5f)).x)
+        if (player.transform.position.x > cameraCenter.x)
         {
             this.gameObject.transform.position = new Vector3(player.transform.position.x, myPos.y, myPos.z);
         }

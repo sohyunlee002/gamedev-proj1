@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour {
 
+    UIManager uiManager;
+
     float groundAcceleration = 15;
     float maxSpeed = 7.5f;
     public float jumpForce = 750;
@@ -20,7 +22,6 @@ public class PlayerController : MonoBehaviour {
     GameObject duckingMario;
     GameObject littleMario;
     GameObject superMario;
-    //UI ui;
     bool super;
     bool little;
 
@@ -32,11 +33,11 @@ public class PlayerController : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
+        uiManager = UIManager.uiManager;
         rb = this.transform.root.gameObject.GetComponent<Rigidbody2D>();
         rb.freezeRotation = true;
         anim = this.gameObject.GetComponent<Animator>();
         myState = new Grounded(this);
-        //ui = GameObject.Find("UI_Canvas").GetComponent<UI>();
         if (gameObject.name == "Super Mario")
         {
             super = true;
@@ -55,6 +56,9 @@ public class PlayerController : MonoBehaviour {
 
     // Update is called once per frame
     void Update () {
+        /*while (ui == null) {
+            ui = GameObject.Find("UI_Canvas").GetComponent<UI>();
+        }*/
         moveX = Input.GetAxis("Horizontal");
         moveJump = Input.GetAxis("Jump");
         myState.Update();
@@ -136,7 +140,7 @@ public class PlayerController : MonoBehaviour {
         {
             Debug.Log("Game Over!");
             //Add other stuff here but for now, just
-            //ui.TakeLife();
+            uiManager.TakeLife();
         }
         else if (super) {
             littleMario.SetActive(true);
@@ -151,7 +155,7 @@ public class PlayerController : MonoBehaviour {
             case "Item":
                 Item item = coll.collider.GetComponent<Item>();
                 item.PickUpItem(this);
-                //ui.UpdateScore(item.GetScore());
+                uiManager.UpdateScore(item.GetScore());
                 break;
             case "Enemy":
                 //On top collider: kill enemy
@@ -160,7 +164,7 @@ public class PlayerController : MonoBehaviour {
                 if (coll.collider.tag == "Enemy_Top")
                 {
                     enemy.HitByPlayer(this);
-                    //ui.UpdateScore(enemy.GetScore());
+                    uiManager.UpdateScore(enemy.GetScore());
                 }
                 else
                 {

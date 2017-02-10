@@ -11,7 +11,7 @@ public class LoadOnClick : MonoBehaviour {
 
     public void Start() {
         SceneManager.UnloadSceneAsync("Main Scene");
-        //UI_Canvas = GameObject.Find("UI_Canvas");
+        UI_Canvas = GameObject.Find("UI_Canvas");
         Title_Screen = GameObject.Find("Title Screen");
         DontDestroyOnLoad(UI_Canvas);
         //UI_Canvas.SetActive(false);
@@ -19,10 +19,11 @@ public class LoadOnClick : MonoBehaviour {
 
     public void LoadScene()
     {
+        Debug.Log(UIManager.uiManager);
+        UIManager.uiManager.LoadScene();
         Title_Screen.SetActive(false);
-        //UI_Canvas.SetActive(true);
         //Wait a few seconds.
-        SceneManager.LoadScene("Main Scene");
+        //SceneManager.LoadScene("Main Scene");
     }
 
 }
