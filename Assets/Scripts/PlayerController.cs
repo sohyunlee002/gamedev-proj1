@@ -16,12 +16,13 @@ public class PlayerController : MonoBehaviour {
     bool facingRight = true;
     Rigidbody2D rb;
     Animator anim;
-    PlayerState myState;
-    PlayerState nextState;
+    public ActionState myState;
+    public MarioState marioState;
     bool stateEnded;
     GameObject duckingMario;
     GameObject littleMario;
     GameObject superMario;
+    GameObject fireMario;
     bool super;
     bool little;
 
@@ -85,6 +86,13 @@ public class PlayerController : MonoBehaviour {
             nextState = null;
             myState.Enter();
         }
+    }
+
+    void ChangeActionState(ActionState nextState)
+    {
+        myState.Exit();
+        myState = nextState;
+        myState.Enter();
     }
 
     void Flip()
@@ -170,7 +178,106 @@ public class PlayerController : MonoBehaviour {
         }
     }
 
-    private class Grounded : PlayerState
+    private class LittleMario : MarioState
+    {
+
+        public LittleMario(PlayerController controller) : base(controller, controller.littleMario)
+        {
+            controller.littleMario.SetActive(true);
+            controller.littleMario.transform.position = 
+                new Vector3(controller.transform.position.x, controller.littleMario.transform.position.y);
+        }
+
+        protected override MarioState nextMario
+        {
+            get
+            {
+                return new SuperMario(controller);
+            }
+        }
+
+        protected override MarioState prevMario
+        {
+            get
+            {
+                return null;
+            }
+        }
+
+        public override void Shrink()
+        {
+            controller.uiManager.TakeLife();
+            controller.gameObject.SetActive(false);
+        }
+    }
+
+    private class SuperMario : MarioState
+    {
+        public SuperMario(PlayerController controller) : base(controller, controller.superMario)
+        {
+            controller.superMario.SetActive(true);
+            controller.superMario.transform.position = 
+                new Vector3(controller.transform.position.x, controller.superMario.transform.position.y);
+        }
+
+        protected override MarioState nextMario
+        {
+            get
+            {
+                return new FireMario(controller);
+            }
+        }
+
+        protected override MarioState prevMario
+        {
+            get
+            {
+                return new LittleMario(controller);
+            }
+        }
+
+        public override void HandleInput()
+        {
+            if (Input.GetButton("Vertical") && Input.GetAxis("Vertical") < -0.01f)
+            {
+                controller.ChangeActionState(new Ducking(controller, controller.myState));
+            } else
+            {
+                controller.myState.HandleInput();
+            }
+        }
+
+    }
+
+    private class FireMario : MarioState
+    {
+        public FireMario(PlayerController controller) : base(controller, controller.fireMario)
+        { }
+
+        protected override MarioState nextMario
+        {
+            get
+            {
+                return null;
+            }
+        }
+
+        protected override MarioState prevMario
+        {
+            get
+            {
+                return new SuperMario(controller);
+            }
+        }
+
+        public override void HandleInput()
+        {
+            //Check if you can throw stuff here.
+        }
+
+    }
+
+    private class Walking : ActionState
     {
 
         PlayerController controller;
@@ -182,7 +289,7 @@ public class PlayerController : MonoBehaviour {
         float maxSpeed;
         float groundAcceleration;
 
-        public Grounded(PlayerController controller) {
+        public Walking(PlayerController controller) {
             this.controller = controller;
             this.rb = controller.rb;
             this.anim = controller.anim;
@@ -245,7 +352,7 @@ public class PlayerController : MonoBehaviour {
 
         }
 
-        public PlayerState HandleInput()
+        public void HandleInput()
         {
             //controller.anim.SetBool("Grounded", false);
             if (Input.GetButton("Jump") || controller.stateEnded)
@@ -259,7 +366,7 @@ public class PlayerController : MonoBehaviour {
         }
     }
 
-    private class InAir : PlayerState
+    private class Jumping : ActionState
     {
 
         PlayerController controller;
@@ -271,7 +378,7 @@ public class PlayerController : MonoBehaviour {
         float airHorizAcceleration;
         float airJumpAcceleration;
 
-        public InAir(PlayerController controller)
+        public Jumping(PlayerController controller)
         {
             this.controller = controller;
             this.rb = controller.rb;
@@ -332,7 +439,7 @@ public class PlayerController : MonoBehaviour {
             rb.velocity = new Vector3(rb.velocity.x, 0);
         }
 
-        public PlayerState HandleInput()
+        public void HandleInput()
         {
             if (controller.stateEnded)
             {
@@ -342,6 +449,109 @@ public class PlayerController : MonoBehaviour {
             {
                 return null;
             }
+        }
+    }
+
+    private class Falling : ActionState
+    {
+        public void Enter()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Exit()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void FixedUpdate()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void HandleInput()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Update()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    private class Ducking : ActionState
+    {
+
+        ActionState prev;
+        PlayerController controller;
+
+        public Ducking(PlayerController controller, ActionState prev)
+        {
+            this.prev = prev;
+            this.controller = controller;
+        }
+
+        public void Enter()
+        {
+        }
+
+        public void Exit()
+        {
+        }
+
+        public void FixedUpdate()
+        {
+        }
+
+        public void HandleInput()
+        {
+        }
+
+        public void Update()
+        {
+            if (Input.GetButtonUp("Vertical"))
+            {
+                controller.ChangeActionState(prev);
+            }
+        }
+    }
+
+    private class Shooting : ActionState
+    {
+
+        ActionState prev;
+        PlayerController controller;
+
+        public Shooting(PlayerController controller, ActionState prev)
+        {
+            this.prev = prev;
+            this.controller = controller;
+        }
+
+        public void Enter()
+        {
+            //Play the animation, spawn the projectile, and then exit.
+        }
+
+        public void Exit()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void FixedUpdate()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void HandleInput()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Update()
+        {
+            throw new NotImplementedException();
         }
     }
 
