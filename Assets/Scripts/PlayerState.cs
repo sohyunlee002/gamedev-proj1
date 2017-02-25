@@ -8,8 +8,7 @@ using System;
 public class LittleMario 
 {
 
-    protected PlayerController controller;
-    protected GameObject myGameObject;
+    
 
     protected MarioState(PlayerController controller, GameObject myGameObject)
     {
