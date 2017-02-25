@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using System.Linq;
 using System;
 
-public abstract class MarioState 
+public class LittleMario 
 {
 
     protected PlayerController controller;
@@ -17,12 +17,12 @@ public abstract class MarioState
         this.myGameObject = myGameObject;
     }
 
-    protected abstract MarioState nextMario
+    public LittleMario nextMario
     {
         get;
     }
 
-    protected abstract MarioState prevMario
+    public LittleMario prevMario
     {
         get;
     }
@@ -33,14 +33,19 @@ public abstract class MarioState
         myGameObject.SetActive(false);
         controller.marioState = nextMario;
     }
+
     //Shrink back to the previous Mario.
     public virtual void Shrink()
     {
         myGameObject.SetActive(false);
         controller.marioState = prevMario;
     }
+
     public virtual void HandleInput()
     {
         controller.myState.HandleInput();
     }
+
+    public abstract string myType();
+
 }

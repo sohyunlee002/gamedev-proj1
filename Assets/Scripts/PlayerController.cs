@@ -5,9 +5,13 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour {
 
+    protected enum MarioType { Little, Super, Fire }
+
     UIManager uiManager;
 
     float groundAcceleration = 15;
+    float airHorizAcceleration = 5;
+    float airJumpAcceleration = 18;
     float maxSpeed = 7.5f;
     public float jumpForce = 750;
     public LayerMask whatIsGround;
@@ -38,7 +42,7 @@ public class PlayerController : MonoBehaviour {
         rb = this.transform.root.gameObject.GetComponent<Rigidbody2D>();
         rb.freezeRotation = true;
         anim = this.gameObject.GetComponent<Animator>();
-        myState = new Grounded(this);
+        myState = new Walking(this);
         if (gameObject.name == "Super Mario")
         {
             super = true;
@@ -60,9 +64,9 @@ public class PlayerController : MonoBehaviour {
         moveX = Input.GetAxis("Horizontal");
         moveJump = Input.GetAxis("Jump");
         myState.Update();
-        if (Input.anyKeyDown || stateEnded)
+        if (Input.anyKey)
         {
-            nextState = myState.HandleInput();
+            myState.HandleInput();
         }
     }
 
@@ -78,17 +82,9 @@ public class PlayerController : MonoBehaviour {
             Flip();
         }
         myState.FixedUpdate();
-        if (nextState != null)
-        {
-            stateEnded = false;
-            myState.Exit();
-            myState = nextState;
-            nextState = null;
-            myState.Enter();
-        }
     }
 
-    void ChangeActionState(ActionState nextState)
+    void TransitionActionState(ActionState nextState)
     {
         myState.Exit();
         myState = nextState;
@@ -178,17 +174,20 @@ public class PlayerController : MonoBehaviour {
         }
     }
 
-    private class LittleMario : MarioState
+    private class LittleMario
     {
 
-        public LittleMario(PlayerController controller) : base(controller, controller.littleMario)
+        protected PlayerController controller;
+        protected GameObject myGameObject;
+
+        public LittleMario(PlayerController controller, GameObject myGameObject)
         {
             controller.littleMario.SetActive(true);
             controller.littleMario.transform.position = 
                 new Vector3(controller.transform.position.x, controller.littleMario.transform.position.y);
         }
 
-        protected override MarioState nextMario
+        public SuperMario nextMario
         {
             get
             {
@@ -196,7 +195,7 @@ public class PlayerController : MonoBehaviour {
             }
         }
 
-        protected override MarioState prevMario
+        public LittleMario prevMario
         {
             get
             {
@@ -204,14 +203,19 @@ public class PlayerController : MonoBehaviour {
             }
         }
 
-        public override void Shrink()
+        public void Shrink()
         {
             controller.uiManager.TakeLife();
             controller.gameObject.SetActive(false);
         }
+
+        public string myType()
+        {
+            return "Little";
+        }
     }
 
-    private class SuperMario : MarioState
+    private class SuperMario : LittleMario
     {
         public SuperMario(PlayerController controller) : base(controller, controller.superMario)
         {
@@ -220,7 +224,7 @@ public class PlayerController : MonoBehaviour {
                 new Vector3(controller.transform.position.x, controller.superMario.transform.position.y);
         }
 
-        protected override MarioState nextMario
+        public new FireMario nextMario
         {
             get
             {
@@ -238,13 +242,12 @@ public class PlayerController : MonoBehaviour {
 
         public override void HandleInput()
         {
-            if (Input.GetButton("Vertical") && Input.GetAxis("Vertical") < -0.01f)
-            {
-                controller.ChangeActionState(new Ducking(controller, controller.myState));
-            } else
-            {
-                controller.myState.HandleInput();
-            }
+
+        }
+
+        public override string myType()
+        {
+            return "Super";
         }
 
     }
@@ -275,53 +278,39 @@ public class PlayerController : MonoBehaviour {
             //Check if you can throw stuff here.
         }
 
+        public override string myType()
+        {
+            return "Fire";
+        }
+
     }
 
     private class Walking : ActionState
     {
 
         PlayerController controller;
-        Rigidbody2D rb;
-        Animator anim;
-        float moveX;
-        float moveJump;
-        float jumpForce;
-        float maxSpeed;
-        float groundAcceleration;
 
         public Walking(PlayerController controller) {
             this.controller = controller;
-            this.rb = controller.rb;
-            this.anim = controller.anim;
-            this.moveX = controller.moveX;
-            this.moveJump = controller.moveJump;
-            this.jumpForce = controller.jumpForce;
-            this.maxSpeed = controller.maxSpeed;
-            this.groundAcceleration = controller.groundAcceleration;
-
         }
 
         public void Enter()
         {
-            moveX = Input.GetAxis("Horizontal");
-            moveJump = Input.GetAxis("Jump");
-            anim.SetBool("Grounded", true);
+            controller.moveX = Input.GetAxis("Horizontal");
+            controller.moveJump = Input.GetAxis("Jump");
+            controller.anim.SetBool("Grounded", true);
         }
 
         public void Update()
         {
-            moveX = Input.GetAxis("Horizontal");
-            moveJump = Input.GetAxis("Jump");
-            if (Input.GetButton("Vertical") && Input.GetAxis("Vertical") < -0.01f && controller.super)
-            {
-                controller.Duck();
-            }
+            controller.moveX = Input.GetAxis("Horizontal");
+            controller.moveJump = Input.GetAxis("Jump");
         }
 
         public void FixedUpdate() {
-            if(Mathf.Abs(rb.velocity.magnitude) <= maxSpeed)
+            if(Mathf.Abs(controller.rb.velocity.magnitude) <= controller.maxSpeed)
             {
-                rb.AddForce(new Vector3(groundAcceleration * moveX, 0));
+                controller.rb.AddForce(new Vector3(controller.groundAcceleration * controller.moveX, 0));
             }
             /*if (Mathf.Abs(rb.velocity.x) <= 3)
             {
@@ -330,100 +319,113 @@ public class PlayerController : MonoBehaviour {
             }*/
             //Check if falling. Pause animation at current frame
             //and add the extra gravity.
-            if (rb.velocity.y < -2)
+            if (controller.rb.velocity.y < -2)
             {
-                controller.stateEnded = true;
+                controller.TransitionActionState(new InAir(controller));
             }
         }
 
         public void Exit()
         {
             /*Determine the animation state. */
-            if (Input.GetButton("Jump"))
-            {
-                rb.AddForce(new Vector3(0, moveJump * jumpForce));
-                anim.SetBool("Grounded", false);
-                anim.SetBool("Jumping", true);
-            }
-            else
-            {
-                anim.enabled = false;
-            }
-
+            //This is why we need a "Walking" Animation state!
+            //Walking won't always lead to Jumping - you could be 
+            //shooting, or ducking!
+            controller.anim.SetBool("Grounded", false);
         }
 
         public void HandleInput()
         {
+            //should walk left and right be handled by handleinput?
             //controller.anim.SetBool("Grounded", false);
-            if (Input.GetButton("Jump") || controller.stateEnded)
+            if (Input.GetButton("Jump"))
             {
-                return new InAir(controller);
+                controller.TransitionActionState(new Jumping(controller));
             }
-            else
+            //instead of handling ducking here, do it in the MarioState
+            //(and have Fire Mario inherit from Super Mario so you don't have to
+            //implement it twice.
+            else if (Input.GetButton("Vertical") && Input.GetAxis("Vertical") < -0.01f 
+                && controller.marioState.myType() != "Little")
             {
-                return null;
+                //Enter ducking state.
+                controller.TransitionActionState(new Ducking(controller, this));
             }
         }
     }
 
-    private class Jumping : ActionState
+    private class InAir : ActionState
     {
 
-        PlayerController controller;
-        Rigidbody2D rb;
-        Animator anim;
-        float moveX;
-        float moveJump;
-        float jumpingTime;
-        float airHorizAcceleration;
-        float airJumpAcceleration;
+        protected PlayerController controller;
 
-        public Jumping(PlayerController controller)
+        public InAir(PlayerController controller)
         {
             this.controller = controller;
-            this.rb = controller.rb;
-            this.anim = controller.anim;
-            this.moveX = controller.moveX;
-            this.moveJump = controller.moveJump;
-            this.airHorizAcceleration = 5;
-            this.airJumpAcceleration = 18;
-            if (Input.GetButton("Jump"))
-            {
-              jumpingTime = 1;
-            }
-            else
-            {
-              jumpingTime = 0;
-            }
         }
 
         public void Enter()
         {
-            moveJump = Input.GetAxis("Jump");
-            moveX = Input.GetAxis("Horizontal");
-            //This only adds force based on the value of
-            //moveJump - which should be zero if its not
-            //pressed.
+            controller.anim.enabled = false;
         }
 
-        public void Update()
+        public void Exit()
         {
-            moveJump = Input.GetAxis("Jump");
-            moveX = Input.GetAxis("Horizontal");
+            controller.anim.enabled = true;
         }
 
         public void FixedUpdate()
         {
+            if (Mathf.Abs(controller.rb.velocity.x) <= controller.maxSpeed)
+            {
+                controller.rb.AddForce(new Vector3(controller.moveX * controller.airHorizAcceleration, 0));
+            }
+            if (controller.CheckForGround())
+            {
+                controller.TransitionActionState(new Walking(controller));
+            }
+        }
+
+        public void HandleInput()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Update()
+        {
+            controller.moveJump = Input.GetAxis("Jump");
+            controller.moveX = Input.GetAxis("Horizontal");
+        }
+    }
+
+    private class Jumping : InAir
+    {
+
+        float jumpingTime;
+
+        public Jumping(PlayerController controller) : base(controller)
+        {
+            this.jumpingTime = 1;
+        }
+
+        public new void Enter()
+        {
+            //This only adds force based on the value of
+            //moveJump - which should be zero if its not
+            //pressed.
+            controller.rb.AddForce(new Vector3(0, controller.moveJump * controller.jumpForce));
+            controller.anim.SetBool("Jumping", true);
+        }
+
+        public new void FixedUpdate()
+        {
+            base.FixedUpdate();
             //Jumping timer
             jumpingTime -= Time.deltaTime;
             //Control in the air
-            if (Mathf.Abs(rb.velocity.x) <= controller.maxSpeed)
-            {
-                rb.AddForce(new Vector3(moveX * airHorizAcceleration, 0));
-            }
             if (jumpingTime >= 0)
             {
-                rb.AddForce(new Vector3(0, moveJump * airJumpAcceleration));
+                controller.rb.AddForce(new Vector3(0, controller.moveJump * controller.airJumpAcceleration));
             }
             //Continuously check that you haven't hit the ground.
             if (controller.CheckForGround())
@@ -432,11 +434,10 @@ public class PlayerController : MonoBehaviour {
             }
         }
 
-        public void Exit()
+        public new void Exit()
         {
-            anim.enabled = true;
-            anim.SetBool("Jumping", false);
-            rb.velocity = new Vector3(rb.velocity.x, 0);
+            controller.anim.SetBool("Jumping", false);
+            controller.rb.velocity = new Vector3(controller.rb.velocity.x, 0);
         }
 
         public void HandleInput()
