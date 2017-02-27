@@ -170,7 +170,7 @@ public class PlayerController : MonoBehaviour {
                 new Vector3(controller.transform.position.x, controller.littleMario.transform.position.y);
         }
 
-        public virtual LittleMario nextMario
+        public LittleMario nextMario
         {
             get
             {
@@ -178,7 +178,7 @@ public class PlayerController : MonoBehaviour {
             }
         }
 
-        public virtual LittleMario prevMario
+        public LittleMario prevMario
         {
             get
             {
@@ -186,7 +186,7 @@ public class PlayerController : MonoBehaviour {
             }
         }
 
-        public virtual string Type
+        public string Type
         {
             get
             {
@@ -195,20 +195,20 @@ public class PlayerController : MonoBehaviour {
         }
 
         //Shrink to the previous Mario.
-        public virtual void Shrink()
+        public void Shrink()
         {
             controller.uiManager.TakeLife();
             controller.gameObject.SetActive(false);
         }
 
         //Grow to the next Mario.
-        public virtual void Grow()
+        public void Grow()
         {
             myGameObject.SetActive(false);
             controller.marioState = nextMario;
         }
 
-        public virtual void Update() { }
+        public void Update() { }
 
     }
 
@@ -221,7 +221,7 @@ public class PlayerController : MonoBehaviour {
                 new Vector3(controller.transform.position.x, controller.superMario.transform.position.y);
         }
 
-        public override LittleMario nextMario
+        public new LittleMario nextMario
         {
             get
             {
@@ -229,7 +229,7 @@ public class PlayerController : MonoBehaviour {
             }
         }
 
-        public override LittleMario prevMario
+        public new LittleMario prevMario
         {
             get
             {
@@ -237,7 +237,7 @@ public class PlayerController : MonoBehaviour {
             }
         }
 
-        public override string Type
+        public new string Type
         {
             get
             {
@@ -245,7 +245,7 @@ public class PlayerController : MonoBehaviour {
             }
         }
 
-        public override void Update()
+        public new void Update()
         {
             if ((Input.GetButton("Vertical") && Input.GetAxis("Vertical") < -0.01f) && 
                     (controller.myState.Type != "Jumping" && controller.myState.Type != "Ducking"))
@@ -262,7 +262,7 @@ public class PlayerController : MonoBehaviour {
         public FireMario(PlayerController controller) : base(controller, controller.fireMario)
         { }
 
-        public override LittleMario nextMario
+        public new LittleMario nextMario
         {
             get
             {
@@ -270,7 +270,7 @@ public class PlayerController : MonoBehaviour {
             }
         }
 
-        public override LittleMario prevMario
+        public new LittleMario prevMario
         {
             get
             {
@@ -278,7 +278,7 @@ public class PlayerController : MonoBehaviour {
             }
         }
 
-        public override string Type
+        public new string Type
         {
             get
             {
@@ -286,7 +286,7 @@ public class PlayerController : MonoBehaviour {
             }
         }
 
-        public override void Update()
+        public new void Update()
         {
             //Check if you can throw stuff here.
         }
@@ -312,7 +312,7 @@ public class PlayerController : MonoBehaviour {
         {
             controller.moveX = Input.GetAxis("Horizontal");
             controller.moveJump = Input.GetAxis("Jump");
-            if (Input.GetButtonDown("Jump"))
+            if (Input.GetButton("Jump"))
             {
                 controller.TransitionActionState(new Jumping(controller));
             }
@@ -410,7 +410,7 @@ public class PlayerController : MonoBehaviour {
             this.jumpingTime = 1;
         }
 
-        public override void Enter()
+        public new void Enter()
         {
             //This only adds force based on the value of
             //moveJump - which should be zero if its not
@@ -419,7 +419,7 @@ public class PlayerController : MonoBehaviour {
             controller.anim.SetBool("Jumping", true);
         }
 
-        public override void FixedUpdate()
+        public new void FixedUpdate()
         {
             base.FixedUpdate();
             //Jumping timer
@@ -437,7 +437,7 @@ public class PlayerController : MonoBehaviour {
             }
         }
 
-        public override void Exit()
+        public new void Exit()
         {
             controller.anim.SetBool("Jumping", false);
             controller.rb.velocity = new Vector3(controller.rb.velocity.x, 0);
