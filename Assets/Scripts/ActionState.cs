@@ -1,15 +1,26 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
 using System;
 
-public interface ActionState
+public abstract class ActionState
 {
-    void Enter();
-    void Exit();
-    void FixedUpdate();
-    void Update();
-    void HandleInput();
+
+    protected PlayerController controller;
+
+    public ActionState(PlayerController controller) {
+        this.controller = controller;
+    }
+    
+    public abstract string Type{ get; }
+
+    public abstract void Enter();
+    
+    public virtual void Update(){}
+
+    public virtual void FixedUpdate(){}
+    
+    public abstract void Exit();
 }

@@ -1,11 +1,13 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour {
 
-    protected enum MarioType { Little, Super, Fire }
+    /*Keep all the animators on the parent gameObject? 
+    * And then the children just hold the colliders
+    */
 
     UIManager uiManager;
 
@@ -182,12 +184,14 @@ public class PlayerController : MonoBehaviour {
 
         public LittleMario(PlayerController controller, GameObject myGameObject)
         {
+            //Is it best to do these things in the constructor? 
+            //Or just add an Enter() function and call it each time.
             controller.littleMario.SetActive(true);
             controller.littleMario.transform.position = 
                 new Vector3(controller.transform.position.x, controller.littleMario.transform.position.y);
         }
 
-        public SuperMario nextMario
+        public LittleMario nextMario
         {
             get
             {
@@ -203,16 +207,30 @@ public class PlayerController : MonoBehaviour {
             }
         }
 
+        public string Type 
+        {
+            get
+            {
+                return "Little"
+            }
+        }
+
+        //Shrink to the previous Mario.
         public void Shrink()
         {
             controller.uiManager.TakeLife();
             controller.gameObject.SetActive(false);
         }
-
-        public string myType()
+        
+        //Grow to the next Mario.
+        public void Grow()
         {
-            return "Little";
+            myGameObject.SetActive(false);
+            controller.marioState = nextMario;
         }
+        
+        public void Update(){}
+        
     }
 
     private class SuperMario : LittleMario
@@ -224,7 +242,7 @@ public class PlayerController : MonoBehaviour {
                 new Vector3(controller.transform.position.x, controller.superMario.transform.position.y);
         }
 
-        public new FireMario nextMario
+        public new LittleMario nextMario
         {
             get
             {
@@ -232,32 +250,40 @@ public class PlayerController : MonoBehaviour {
             }
         }
 
-        protected override MarioState prevMario
+        public new LittleMario prevMario
         {
             get
             {
                 return new LittleMario(controller);
             }
         }
-
-        public override void HandleInput()
+        
+        public new string Type 
         {
-
+            get
+            {
+                return "Super"
+            }
         }
 
-        public override string myType()
+        public new void Update()
         {
-            return "Super";
+            if ((Input.GetButton("Vertical") && Input.GetAxis("Vertical") < -0.01f 
+                && controller.marioState.myType() != "Little") && (controller.myState.Type && "Jumping" && controller.myState.Type != "Ducking"))
+            {
+                //Enter ducking state.
+                controller.TransitionActionState(new Ducking(controller, this), this);
+            }
         }
 
     }
 
-    private class FireMario : MarioState
+    private class FireMario : SuperMario
     {
         public FireMario(PlayerController controller) : base(controller, controller.fireMario)
         { }
 
-        protected override MarioState nextMario
+        public new LittleMario nextMario
         {
             get
             {
@@ -265,22 +291,25 @@ public class PlayerController : MonoBehaviour {
             }
         }
 
-        protected override MarioState prevMario
+        public new LittleMario prevMario
         {
             get
             {
                 return new SuperMario(controller);
             }
         }
-
-        public override void HandleInput()
+        
+        public new string Type 
         {
-            //Check if you can throw stuff here.
+            get
+            {
+                return "Fire"
+            }
         }
 
-        public override string myType()
+        public new void Update()
         {
-            return "Fire";
+            //Check if you can throw stuff here.
         }
 
     }
@@ -288,26 +317,30 @@ public class PlayerController : MonoBehaviour {
     private class Walking : ActionState
     {
 
-        PlayerController controller;
-
-        public Walking(PlayerController controller) {
-            this.controller = controller;
+        public Walking(PlayerController controller) : base(controller)
+        {
+            
         }
 
-        public void Enter()
+        public override void Enter()
         {
             controller.moveX = Input.GetAxis("Horizontal");
             controller.moveJump = Input.GetAxis("Jump");
             controller.anim.SetBool("Grounded", true);
         }
 
-        public void Update()
+        public override void Update()
         {
             controller.moveX = Input.GetAxis("Horizontal");
             controller.moveJump = Input.GetAxis("Jump");
+            if (Input.GetButton("Jump"))
+            {
+                controller.TransitionActionState(new Jumping(controller));
+            }
         }
 
-        public void FixedUpdate() {
+        public override void FixedUpdate() 
+        {
             if(Mathf.Abs(controller.rb.velocity.magnitude) <= controller.maxSpeed)
             {
                 controller.rb.AddForce(new Vector3(controller.groundAcceleration * controller.moveX, 0));
@@ -325,7 +358,7 @@ public class PlayerController : MonoBehaviour {
             }
         }
 
-        public void Exit()
+        public override void Exit()
         {
             /*Determine the animation state. */
             //This is why we need a "Walking" Animation state!
@@ -333,48 +366,24 @@ public class PlayerController : MonoBehaviour {
             //shooting, or ducking!
             controller.anim.SetBool("Grounded", false);
         }
-
-        public void HandleInput()
-        {
-            //should walk left and right be handled by handleinput?
-            //controller.anim.SetBool("Grounded", false);
-            if (Input.GetButton("Jump"))
-            {
-                controller.TransitionActionState(new Jumping(controller));
-            }
-            //instead of handling ducking here, do it in the MarioState
-            //(and have Fire Mario inherit from Super Mario so you don't have to
-            //implement it twice.
-            else if (Input.GetButton("Vertical") && Input.GetAxis("Vertical") < -0.01f 
-                && controller.marioState.myType() != "Little")
-            {
-                //Enter ducking state.
-                controller.TransitionActionState(new Ducking(controller, this));
-            }
-        }
     }
 
     private class InAir : ActionState
     {
 
-        protected PlayerController controller;
+        public InAir(PlayerController controller) : base(controller);
 
-        public InAir(PlayerController controller)
-        {
-            this.controller = controller;
-        }
-
-        public void Enter()
+        public override void Enter()
         {
             controller.anim.enabled = false;
         }
 
-        public void Exit()
+        public override void Exit()
         {
             controller.anim.enabled = true;
         }
 
-        public void FixedUpdate()
+        public override void FixedUpdate()
         {
             if (Mathf.Abs(controller.rb.velocity.x) <= controller.maxSpeed)
             {
@@ -386,12 +395,7 @@ public class PlayerController : MonoBehaviour {
             }
         }
 
-        public void HandleInput()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Update()
+        public override void Update()
         {
             controller.moveJump = Input.GetAxis("Jump");
             controller.moveX = Input.GetAxis("Horizontal");
@@ -427,10 +431,11 @@ public class PlayerController : MonoBehaviour {
             {
                 controller.rb.AddForce(new Vector3(0, controller.moveJump * controller.airJumpAcceleration));
             }
-            //Continuously check that you haven't hit the ground.
-            if (controller.CheckForGround())
+            //Once you've reached the apex of your jump and you start falling,
+            //re-enter the InAir state.
+            if (controller.rb.velocity.y < -0.01f) 
             {
-                controller.stateEnded = true;
+                controller.TransitionActionState(new InAir(controller))
             }
         }
 
@@ -439,81 +444,36 @@ public class PlayerController : MonoBehaviour {
             controller.anim.SetBool("Jumping", false);
             controller.rb.velocity = new Vector3(controller.rb.velocity.x, 0);
         }
-
-        public void HandleInput()
-        {
-            if (controller.stateEnded)
-            {
-                return new Grounded(controller);
-            }
-            else
-            {
-                return null;
-            }
-        }
-    }
-
-    private class Falling : ActionState
-    {
-        public void Enter()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Exit()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void FixedUpdate()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void HandleInput()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Update()
-        {
-            throw new NotImplementedException();
-        }
     }
 
     private class Ducking : ActionState
     {
 
-        ActionState prev;
-        PlayerController controller;
+        GameObject prevMarioGO;
 
-        public Ducking(PlayerController controller, ActionState prev)
+        public Ducking(PlayerController controller, GameObject prevMarioGO) : base(controller)
         {
-            this.prev = prev;
-            this.controller = controller;
+            this.prevMarioGO = prevMarioGO;
         }
 
         public void Enter()
         {
+            //Activate DuckingMario,
+            //and stop it from sliding
         }
 
         public void Exit()
         {
-        }
-
-        public void FixedUpdate()
-        {
-        }
-
-        public void HandleInput()
-        {
+            //Deactivate DuckingMario, and reactivate previous Mario
+            prevMarioGO.SetActive(true);
         }
 
         public void Update()
         {
             if (Input.GetButtonUp("Vertical"))
             {
-                controller.ChangeActionState(prev);
+                //You can only duck when you're on the ground.
+                controller.TransitionActionState(new Walking(controller));
             }
         }
     }
