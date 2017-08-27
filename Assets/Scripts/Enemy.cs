@@ -22,7 +22,7 @@ public abstract class Enemy : MonoBehaviour {
 
     public virtual void FixedUpdate () {
 		
-	}
+    }
 
     public int GetScore()
     {

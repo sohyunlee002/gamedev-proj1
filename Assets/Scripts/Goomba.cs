@@ -14,8 +14,8 @@ public class Goomba : Enemy {
         scoreValue = 100;
     }
 
-	// Update is called once per frame
-	public override void FixedUpdate () {
+    // Update is called once per frame
+    public override void FixedUpdate () {
         if (dead)
         {
             if (timeToDeath <= 0)
