@@ -38,7 +38,7 @@ public class Goomba : Enemy {
         }
     }
 
-    public override void HitByPlayer(PlayerController player)
+    public override void HitByPlayer()
     {
         anim.SetBool("Hit", true);
         rb.velocity = Vector3.zero;
@@ -49,8 +49,8 @@ public class Goomba : Enemy {
         rb.isKinematic = true;
     }
 
-    public override void HitPlayer(PlayerController player)
+    public override void HitPlayer(Mario marioState)
     {
-        player.Shrink();
+        marioState.Shrink(marioState.prevMario);
     }
 }

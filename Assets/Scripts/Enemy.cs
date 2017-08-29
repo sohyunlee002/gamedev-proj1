@@ -29,6 +29,6 @@ public abstract class Enemy : MonoBehaviour {
         return scoreValue;
     }
 
-    public abstract void HitByPlayer(PlayerController player);
-    public abstract void HitPlayer(PlayerController player);
+    public abstract void HitByPlayer();
+    public abstract void HitPlayer(Mario marioState);
 }

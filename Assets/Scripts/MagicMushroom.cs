@@ -58,7 +58,7 @@ public class MagicMushroom : Item {
 
     public override void PickUpItem(PlayerController player)
     {
-        player.Grow();
+        player.marioState.Grow(player.superMario);
         Destroy(gameObject);
     }
 

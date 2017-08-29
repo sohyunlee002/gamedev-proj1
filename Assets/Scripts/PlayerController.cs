@@ -11,6 +11,26 @@ public class PlayerController : MonoBehaviour {
 
     UIManager uiManager;
 
+    //The action that Mario is currently performing.
+    public ActionState myState;
+    //The form that Mario is currently in.
+    public Mario marioState;
+    //The animator on the form that Mario is currently in.
+    public Animator anim;
+
+    //Little Mario
+    public Mario mario;
+    //Super Mario
+    public SuperMario superMario;
+    //Walking state
+    ActionState walking;
+    //Jumping state
+    ActionState jumping;
+    //InAir state
+    ActionState inAir;
+    //Ducking state
+    ActionState ducking;
+
     float groundAcceleration = 15;
     float airHorizAcceleration = 5;
     float airJumpAcceleration = 18;
@@ -21,18 +41,14 @@ public class PlayerController : MonoBehaviour {
     float moveJump;
     bool facingRight = true;
     Rigidbody2D rb;
-    Animator anim;
-    ActionState myState;
-    LittleMario marioState;
+    GameObject marioGO;
+    GameObject superMarioGO;
     GameObject duckingMario;
-    GameObject littleMario;
-    GameObject superMario;
-    GameObject fireMario;
 
     //Awake is called before any Start function
     void Awake() {
-        littleMario = GameObject.Find("Little Mario");
-        superMario = GameObject.Find("Super Mario");
+        marioGO = GameObject.Find("Little Mario");
+        superMarioGO = GameObject.Find("Super Mario");
     }
 
     // Use this for initialization
@@ -40,14 +56,24 @@ public class PlayerController : MonoBehaviour {
         uiManager = UIManager.uiManager;
         rb = this.transform.root.gameObject.GetComponent<Rigidbody2D>();
         rb.freezeRotation = true;
-        anim = this.gameObject.GetComponent<Animator>();
+        //anim = this.gameObject.GetComponent<Animator>();
+        //Initialize states
+        mario = new Mario(this, marioGO);
+        superMario = new SuperMario(this, superMarioGO, mario);
+
+        /*walking = new Walking(this);
+        jumping = new Jumping(this);
+        inAir = new InAir(this);
+        ducking = new Ducking(this);*/
+
+        //Set initial states
         myState = new Walking(this);
-        marioState = new LittleMario(this, this.littleMario);
+        EnterMarioState(mario);
         if (gameObject.name == "Super Mario")
         {
             duckingMario = GameObject.Find("Ducking Mario");
             duckingMario.SetActive(false);
-            superMario.SetActive(false);
+            superMarioGO.SetActive(false);
         }
         else
         {
@@ -83,6 +109,11 @@ public class PlayerController : MonoBehaviour {
         myState.Enter();
     }
 
+    void EnterMarioState(Mario nextMario) {
+        marioState = nextMario;
+        marioState.Enter();
+    }
+
     void Flip()
     {
         facingRight = !facingRight;
@@ -115,19 +146,21 @@ public class PlayerController : MonoBehaviour {
         this.gameObject.SetActive(false);
     }
 
-    public void Grow() {
+    public void Grow(Mario nextMario) {
         //If littleMario turn into superMario.
         //If superMario turn into fireMario.
-        marioState.Grow();
+        marioState.Grow(nextMario);
     }
 
-    public void Shrink() {
+    public void Shrink(Mario prevMario) {
         //If littleMario then gameOver.
         //If superMario turn into littleMario.
         //If fireMario turn into superMario.
-        marioState.Shrink();
+        marioState.Shrink(prevMario);
     }
 
+
+    //Adapter pattern here
     public void OnCollisionEnter2D(Collision2D coll) {
         switch (LayerMask.LayerToName(coll.gameObject.layer))
         {
@@ -142,155 +175,15 @@ public class PlayerController : MonoBehaviour {
                 Enemy enemy = coll.transform.parent.GetComponentInChildren<Enemy>();
                 if (coll.collider.tag == "Enemy_Top")
                 {
-                    enemy.HitByPlayer(this);
+                    enemy.HitByPlayer();
                     uiManager.UpdateScore(enemy.GetScore());
                 }
                 else
                 {
-                    enemy.HitPlayer(this);
+                    enemy.HitPlayer(this.marioState);
                 }
                 break;
         }
-    }
-
-    private class LittleMario
-    {
-
-        protected PlayerController controller;
-        protected GameObject myGameObject;
-
-        public LittleMario(PlayerController controller, GameObject myGameObject)
-        {
-            this.controller = controller;
-            this.myGameObject = myGameObject;
-            //Is it best to do these things in the constructor? 
-            //Or just add an Enter() function and call it each time.
-            controller.littleMario.SetActive(true);
-            controller.littleMario.transform.position =
-                new Vector3(controller.transform.position.x, controller.littleMario.transform.position.y);
-        }
-
-        public virtual LittleMario nextMario
-        {
-            get
-            {
-                return new SuperMario(controller, controller.superMario);
-            }
-        }
-
-        public virtual LittleMario prevMario
-        {
-            get
-            {
-                return null;
-            }
-        }
-
-        public virtual string Type
-        {
-            get
-            {
-                return "Little";
-            }
-        }
-
-        //Shrink to the previous Mario.
-        public virtual void Shrink()
-        {
-            controller.uiManager.TakeLife();
-            controller.gameObject.SetActive(false);
-        }
-
-        //Grow to the next Mario.
-        public virtual void Grow()
-        {
-            myGameObject.SetActive(false);
-            controller.marioState = nextMario;
-        }
-
-        public virtual void Update() { }
-
-    }
-
-    private class SuperMario : LittleMario
-    {
-        public SuperMario(PlayerController controller, GameObject myGameObject) : base(controller, controller.superMario)
-        {
-            controller.superMario.SetActive(true);
-            controller.superMario.transform.position =
-                new Vector3(controller.transform.position.x, controller.superMario.transform.position.y);
-        }
-
-        public override LittleMario nextMario
-        {
-            get
-            {
-                return new FireMario(controller);
-            }
-        }
-
-        public override LittleMario prevMario
-        {
-            get
-            {
-                return new LittleMario(controller, controller.littleMario);
-            }
-        }
-
-        public override string Type
-        {
-            get
-            {
-                return "Super";
-            }
-        }
-
-        public override void Update()
-        {
-            if ((Input.GetButton("Vertical") && Input.GetAxis("Vertical") < -0.01f) && 
-                    (controller.myState.Type != "Jumping" && controller.myState.Type != "Ducking"))
-            {
-                //Enter ducking state.
-                controller.TransitionActionState(new Ducking(controller, myGameObject));
-            }
-        }
-
-    }
-
-    private class FireMario : SuperMario
-    {
-        public FireMario(PlayerController controller) : base(controller, controller.fireMario)
-        { }
-
-        public override LittleMario nextMario
-        {
-            get
-            {
-                return null;
-            }
-        }
-
-        public override LittleMario prevMario
-        {
-            get
-            {
-                return new SuperMario(controller, controller.superMario);
-            }
-        }
-
-        public override string Type
-        {
-            get
-            {
-                return "Fire";
-            }
-        }
-
-        public override void Update()
-        {
-            //Check if you can throw stuff here.
-        }
-
     }
 
     private class Walking : ActionState
