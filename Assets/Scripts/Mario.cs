@@ -6,10 +6,9 @@ public class Mario
 {
 
     protected PlayerController controller;
-    protected GameObject gameObject;
-    //The Mario form that this form would canonically shrink into.
-    //Set by the controller.
-    public Mario prevMario;
+    public GameObject gameObject;
+    public Mario prevMario = null;
+    protected bool canDuck = false;
 
     public Mario(PlayerController controller, GameObject gameObject, Mario prevMario = null)
     {
@@ -28,29 +27,18 @@ public class Mario
         gameObject.SetActive(true);
         gameObject.transform.position = 
             new Vector3(controller.transform.position.x, gameObject.transform.position.y);
+        Vector3 scale = gameObject.transform.localScale;
+        scale.x = scale.x * Mathf.Sign(controller.transform.localScale.x);
     }
 
-    /* These are the two ways in which this state can Exit. By shrinking to the previous form, 
-     * or growing into the next form. */
-
-    //Shrink to the previous Mario.
-    public Mario Shrink(Mario prevMario)
-    {
-        if (prevMario == null) {
-            UIManager.uiManager.TakeLife();
-            controller.gameObject.SetActive(false);
-            return null;
-        } else
-        {
-            return prevMario;
-        }
-        
-    }
-
-    //Grow to the next Mario.
-    public Mario Grow(Mario nextMario)
-    {
+    public Mario Exit(Mario newState) {
         gameObject.SetActive(false);
-        return nextMario;
+        return newState;
     }
+
+    public bool CanDuck()
+    {
+        return canDuck;
+    }
+
 }

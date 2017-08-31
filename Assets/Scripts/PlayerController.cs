@@ -45,14 +45,11 @@ public class PlayerController : MonoBehaviour {
     GameObject superMarioGO;
     GameObject duckingMarioGO;
 
-    //Awake is called before any Start function
-    void Awake() {
-        marioGO = GameObject.Find("Little Mario");
-        superMarioGO = GameObject.Find("Super Mario");
-    }
-
     // Use this for initialization
     void Start () {
+        marioGO = GameObject.Find("Little Mario");
+        superMarioGO = GameObject.Find("Super Mario");
+        duckingMarioGO = GameObject.Find("Ducking Mario");
         uiManager = UIManager.uiManager;
         rb = gameObject.GetComponent<Rigidbody2D>();
         rb.freezeRotation = true;
@@ -68,17 +65,11 @@ public class PlayerController : MonoBehaviour {
 
         //Set initial states
         myState = new Walking(this);
-        EnterMarioState(mario);
-        if (gameObject.name == "Super Mario")
-        {
-            duckingMarioGO = GameObject.Find("Ducking Mario");
-            duckingMarioGO.SetActive(false);
-            superMarioGO.SetActive(false);
-        }
-        else
-        {
-            duckingMarioGO = null;
-        }
+        marioState = mario;
+        marioState.Enter();
+        //Always start in Little Mario
+        duckingMarioGO.SetActive(false);
+        superMarioGO.SetActive(false);
     }
 
     // Update is called once per frame
@@ -89,8 +80,10 @@ public class PlayerController : MonoBehaviour {
     }
 
     void FixedUpdate() {
-        anim.SetFloat("Speed", Mathf.Abs(rb.velocity.x));
-        anim.SetFloat("vSpeed", Mathf.Abs(rb.velocity.y));
+        if (anim.gameObject.activeSelf) {
+            anim.SetFloat("Speed", Mathf.Abs(rb.velocity.x));
+            anim.SetFloat("vSpeed", Mathf.Abs(rb.velocity.y));
+        }
         if (moveX < 0 && facingRight)
         {
             Flip();
@@ -109,23 +102,37 @@ public class PlayerController : MonoBehaviour {
         myState.Enter();
     }
 
-    void EnterMarioState(Mario nextMario) {
-        marioState = nextMario;
+    public void Grow(Mario nextMario)
+    {
+        marioState = marioState.Exit(nextMario);
         marioState.Enter();
+    }
+
+    public void Shrink()
+    {
+        marioState = marioState.Exit(marioState.prevMario);
+        if (marioState == null)
+        {
+            uiManager.TakeLife();
+        }
+        else
+        {
+            marioState.Enter();
+        }
     }
 
     void Flip()
     {
         facingRight = !facingRight;
-        Vector3 scale = marioState.gameObject.transform.localScale;
+        Vector3 scale = gameObject.transform.localScale;
         scale.x = scale.x * -1;
-	marioState.gameObject.transform.localScale = scale;
+	    gameObject.transform.localScale = scale;
         rb.AddForce(new Vector3(-25 * rb.velocity.x, 0));
     }
 
     bool CheckForGround()
     {
-        SpriteRenderer mySprite = GetComponent<SpriteRenderer>();
+        SpriteRenderer mySprite = marioState.gameObject.GetComponent<SpriteRenderer>();
         float castHeight = mySprite.sprite.bounds.size.y / 2 + 0.25f;
         Vector3 origin = new Vector3(transform.position.x, transform.position.y);
         RaycastHit2D hit = Physics2D.Raycast(origin, Vector3.down, castHeight, whatIsGround);
@@ -133,42 +140,16 @@ public class PlayerController : MonoBehaviour {
         return hit.collider != null;
     }
 
-    void Duck()
-    {
-        duckingMarioGO.SetActive(true);
-        duckingMarioGO.transform.position = new Vector3(rb.position.x, duckingMarioGO.transform.position.y);
-        rb.velocity = Vector3.zero;
-        if (!facingRight)
-        {
-            Vector3 scale = duckingMarioGO.transform.localScale;
-            scale.x = scale.x * -1;
-            duckingMarioGO.transform.localScale = scale;
-        }
-        this.gameObject.SetActive(false);
-    }
-
-    public void Grow(Mario nextMario) {
-        //If littleMario turn into superMario.
-        //If superMario turn into fireMario.
-        marioState.Grow(nextMario);
-    }
-
-    public void Shrink(Mario prevMario) {
-        //If littleMario then gameOver.
-        //If superMario turn into littleMario.
-        //If fireMario turn into superMario.
-        marioState.Shrink(prevMario);
-    }
-
-
     //Adapter pattern here
     public void OnCollisionEnter2D(Collision2D coll) {
         switch (LayerMask.LayerToName(coll.gameObject.layer))
         {
             case "Item":
                 Item item = coll.collider.GetComponent<Item>();
-                item.PickUpItem(this);
-                uiManager.UpdateScore(item.GetScore());
+                if (!item.isPickedUp()) {
+                    item.PickUpItem(this);
+                    uiManager.UpdateScore(item.GetScore());
+                }
                 break;
             case "Enemy":
                 //On top collider: kill enemy
@@ -181,7 +162,7 @@ public class PlayerController : MonoBehaviour {
                 }
                 else
                 {
-                    enemy.HitPlayer(this.marioState);
+                    enemy.HitPlayer(this);
                 }
                 break;
         }
@@ -189,6 +170,10 @@ public class PlayerController : MonoBehaviour {
 
     private class Walking : ActionState
     {
+
+        float lastFrameVertical;
+        float lastFrameHorizontal;
+        float lastFrameVelocity;
 
         public Walking(PlayerController controller) : base(controller)
         {
@@ -199,6 +184,7 @@ public class PlayerController : MonoBehaviour {
         {
             controller.moveX = Input.GetAxis("Horizontal");
             controller.moveJump = Input.GetAxis("Jump");
+            lastFrameVertical = Input.GetAxis("Vertical");
             controller.anim.SetBool("Grounded", true);
         }
 
@@ -210,6 +196,11 @@ public class PlayerController : MonoBehaviour {
             {
                 controller.TransitionActionState(new Jumping(controller));
             }
+            else if (Input.GetAxis("Vertical") < lastFrameVertical && controller.marioState.CanDuck())
+            {
+                controller.TransitionActionState(new Ducking(controller, controller.marioState.gameObject));
+            }
+            lastFrameVertical = Input.GetAxis("Vertical");
         }
 
         public override void FixedUpdate() 
@@ -218,11 +209,6 @@ public class PlayerController : MonoBehaviour {
             {
                 controller.rb.AddForce(new Vector3(controller.groundAcceleration * controller.moveX, 0));
             }
-            /*if (Mathf.Abs(rb.velocity.x) <= 3)
-            {
-                Debug.Log("falling slowly");
-                rb.velocity = Vector3.zero;
-            }*/
             //Check if falling. Pause animation at current frame
             //and add the extra gravity.
             if (controller.rb.velocity.y < -2)
@@ -315,8 +301,12 @@ public class PlayerController : MonoBehaviour {
 
         public override void FixedUpdate()
         {
-            base.FixedUpdate();
+            //base.FixedUpdate();
             //Jumping timer
+            if (Mathf.Abs(controller.rb.velocity.x) <= controller.maxSpeed)
+            {
+                controller.rb.AddForce(new Vector3(controller.moveX * controller.airHorizAcceleration, 0));
+            }
             jumpingTime -= Time.deltaTime;
             //Control in the air
             if (jumpingTime >= 0)
@@ -336,27 +326,45 @@ public class PlayerController : MonoBehaviour {
             controller.anim.SetBool("Jumping", false);
             controller.rb.velocity = new Vector3(controller.rb.velocity.x, 0);
         }
+
+        public override string Type
+        {
+            get
+            {
+                return "Jumping";
+            }
+        }
+
     }
 
     private class Ducking : ActionState
     {
 
         GameObject prevMarioGO;
+        GameObject duckingMarioGO;
 
         public Ducking(PlayerController controller, GameObject prevMarioGO) : base(controller)
         {
             this.prevMarioGO = prevMarioGO;
+            this.duckingMarioGO = controller.duckingMarioGO;
         }
 
         public override void Enter()
         {
             //Activate DuckingMario,
             //and stop it from sliding
+            duckingMarioGO.SetActive(true);
+            duckingMarioGO.transform.position = new Vector3(controller.rb.position.x, duckingMarioGO.transform.position.y);
+            controller.rb.velocity = Vector3.zero;
+            Vector3 scale = controller.gameObject.transform.localScale;
+            scale.x = scale.x * Mathf.Sign(scale.x);
+            prevMarioGO.SetActive(false);
         }
 
         public override void Exit()
         {
             //Deactivate DuckingMario, and reactivate previous Mario
+            duckingMarioGO.SetActive(false);
             prevMarioGO.SetActive(true);
         }
 
@@ -370,7 +378,7 @@ public class PlayerController : MonoBehaviour {
         }
 
         public override string Type
-        aaa{
+        {
             get
             {
                 return "Ducking";

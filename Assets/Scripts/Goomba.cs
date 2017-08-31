@@ -49,8 +49,8 @@ public class Goomba : Enemy {
         rb.isKinematic = true;
     }
 
-    public override void HitPlayer(Mario marioState)
+    public override void HitPlayer(PlayerController player)
     {
-        marioState.Shrink(marioState.prevMario);
+        player.Shrink();
     }
 }

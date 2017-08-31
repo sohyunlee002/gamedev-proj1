@@ -30,5 +30,5 @@ public abstract class Enemy : MonoBehaviour {
     }
 
     public abstract void HitByPlayer();
-    public abstract void HitPlayer(Mario marioState);
+    public abstract void HitPlayer(PlayerController player);
 }

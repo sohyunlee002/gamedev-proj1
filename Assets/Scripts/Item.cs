@@ -10,6 +10,7 @@ public abstract class Item : MonoBehaviour{
     protected int scoreValue = 0;
 
     public bool activated = false;
+    protected bool pickedUp = false;
 
     /* Use for item movement, sounds, etc. */
     public abstract void ItemBehavior();
@@ -36,5 +37,10 @@ public abstract class Item : MonoBehaviour{
     public int GetScore()
     {
         return scoreValue;
+    }
+
+    public bool isPickedUp()
+    {
+        return pickedUp;
     }
 }
