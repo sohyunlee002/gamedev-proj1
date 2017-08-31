@@ -43,7 +43,7 @@ public class PlayerController : MonoBehaviour {
     Rigidbody2D rb;
     GameObject marioGO;
     GameObject superMarioGO;
-    GameObject duckingMario;
+    GameObject duckingMarioGO;
 
     //Awake is called before any Start function
     void Awake() {
@@ -54,7 +54,7 @@ public class PlayerController : MonoBehaviour {
     // Use this for initialization
     void Start () {
         uiManager = UIManager.uiManager;
-        rb = this.transform.root.gameObject.GetComponent<Rigidbody2D>();
+        rb = gameObject.GetComponent<Rigidbody2D>();
         rb.freezeRotation = true;
         //anim = this.gameObject.GetComponent<Animator>();
         //Initialize states
@@ -71,13 +71,13 @@ public class PlayerController : MonoBehaviour {
         EnterMarioState(mario);
         if (gameObject.name == "Super Mario")
         {
-            duckingMario = GameObject.Find("Ducking Mario");
-            duckingMario.SetActive(false);
+            duckingMarioGO = GameObject.Find("Ducking Mario");
+            duckingMarioGO.SetActive(false);
             superMarioGO.SetActive(false);
         }
         else
         {
-            duckingMario = null;
+            duckingMarioGO = null;
         }
     }
 
@@ -117,13 +117,14 @@ public class PlayerController : MonoBehaviour {
     void Flip()
     {
         facingRight = !facingRight;
-        Vector3 scale = this.gameObject.transform.localScale;
+        Vector3 scale = marioState.gameObject.transform.localScale;
         scale.x = scale.x * -1;
-        this.gameObject.transform.localScale = scale;
+	marioState.gameObject.transform.localScale = scale;
         rb.AddForce(new Vector3(-25 * rb.velocity.x, 0));
     }
 
-    bool CheckForGround() {
+    bool CheckForGround()
+    {
         SpriteRenderer mySprite = GetComponent<SpriteRenderer>();
         float castHeight = mySprite.sprite.bounds.size.y / 2 + 0.25f;
         Vector3 origin = new Vector3(transform.position.x, transform.position.y);
@@ -134,14 +135,14 @@ public class PlayerController : MonoBehaviour {
 
     void Duck()
     {
-        duckingMario.SetActive(true);
-        duckingMario.transform.position = new Vector3(rb.position.x, duckingMario.transform.position.y);
+        duckingMarioGO.SetActive(true);
+        duckingMarioGO.transform.position = new Vector3(rb.position.x, duckingMarioGO.transform.position.y);
         rb.velocity = Vector3.zero;
         if (!facingRight)
         {
-            Vector3 scale = duckingMario.transform.localScale;
+            Vector3 scale = duckingMarioGO.transform.localScale;
             scale.x = scale.x * -1;
-            duckingMario.transform.localScale = scale;
+            duckingMarioGO.transform.localScale = scale;
         }
         this.gameObject.SetActive(false);
     }
@@ -369,7 +370,7 @@ public class PlayerController : MonoBehaviour {
         }
 
         public override string Type
-        {
+        aaa{
             get
             {
                 return "Ducking";
