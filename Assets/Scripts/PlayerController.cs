@@ -93,6 +93,9 @@ public class PlayerController : MonoBehaviour {
             Flip();
         }
         myState.FixedUpdate();
+        if (gameObject.transform.localPosition.y < -1) {
+            uiManager.TakeLife();
+        }
     }
 
     void TransitionActionState(ActionState nextState)
