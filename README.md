@@ -7,7 +7,7 @@ In this project, you will extend our simple 2D platformer with new abilities, it
 ## Project Setup
 
 1. Make a new directory and create a new git repo: ``git init``
-2. Add the course remote: ``git remote add course --placeholder--``  
+2. Add the course remote: ``git remote add course https://github.berkeley.edu/berkeley-gamedev/Project-1.git``  
 3. Pull from the remote to get the skeleton code: ``git pull course master``
 4. Pull often for bug fixes!
 5. Stage the skeleton code in your local repository: ``git add -A``
