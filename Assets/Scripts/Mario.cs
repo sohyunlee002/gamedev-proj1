@@ -16,9 +16,7 @@ public class Mario
         this.gameObject = gameObject;
         //Is it best to do these things in the constructor? 
         //Or just add an Enter() function and call it each time.
-        if (prevMario != null) {
-            this.prevMario = prevMario;
-        }
+        this.prevMario = prevMario;
     }
 
     public void Enter()

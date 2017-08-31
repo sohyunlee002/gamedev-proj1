@@ -4,9 +4,8 @@ using UnityEngine;
 
 public class SuperMario : Mario {
 
-    public SuperMario(PlayerController controller, GameObject myGameObject, Mario prevMario) : base(controller, myGameObject)
+    public SuperMario(PlayerController controller, GameObject myGameObject, Mario prevMario) : base(controller, myGameObject, prevMario)
     {
-        this.prevMario = prevMario;
         this.canDuck = true;
     }    
 

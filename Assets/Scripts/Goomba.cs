@@ -37,20 +37,4 @@ public class Goomba : Enemy {
             }
         }
     }
-
-    public override void HitByPlayer()
-    {
-        anim.SetBool("Hit", true);
-        rb.velocity = Vector3.zero;
-        dead = true;
-        foreach (Collider2D collider in myColliders) {
-            Destroy(collider);
-        }
-        rb.isKinematic = true;
-    }
-
-    public override void HitPlayer(PlayerController player)
-    {
-        player.Shrink();
-    }
 }

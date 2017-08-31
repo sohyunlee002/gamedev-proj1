@@ -40,6 +40,7 @@ public class PlayerController : MonoBehaviour {
     float moveX;
     float moveJump;
     bool facingRight = true;
+    bool playerHit = false;
     Rigidbody2D rb;
     GameObject marioGO;
     GameObject superMarioGO;
@@ -95,6 +96,7 @@ public class PlayerController : MonoBehaviour {
         myState.FixedUpdate();
         if (gameObject.transform.localPosition.y < -1) {
             uiManager.TakeLife();
+            gameObject.SetActive(false);
         }
     }
 
@@ -117,11 +119,22 @@ public class PlayerController : MonoBehaviour {
         if (marioState == null)
         {
             uiManager.TakeLife();
+            gameObject.SetActive(false);
         }
         else
         {
-            marioState.Enter();
+            StartCoroutine("Invulnerable");
         }
+    }
+
+    IEnumerator Invulnerable() {
+        marioState.Enter();
+        playerHit = true;
+        rb.velocity = Vector3.zero;
+        rb.isKinematic = true;
+        yield return new WaitForSeconds(1);
+        rb.isKinematic = false;
+        playerHit = false;
     }
 
     void Flip()
@@ -165,7 +178,9 @@ public class PlayerController : MonoBehaviour {
                 }
                 else
                 {
-                    enemy.HitPlayer(this);
+                    if (!playerHit) {
+                        enemy.HitPlayer(this);
+                    }
                 }
                 break;
         }
@@ -199,7 +214,8 @@ public class PlayerController : MonoBehaviour {
             {
                 controller.TransitionActionState(new Jumping(controller));
             }
-            else if (Input.GetAxis("Vertical") < lastFrameVertical && controller.marioState.CanDuck())
+            else if (Input.GetAxis("Vertical") < lastFrameVertical && Input.GetAxis("Vertical") <= -0.01f 
+                && controller.marioState.CanDuck())
             {
                 controller.TransitionActionState(new Ducking(controller, controller.marioState.gameObject));
             }
@@ -385,45 +401,6 @@ public class PlayerController : MonoBehaviour {
             get
             {
                 return "Ducking";
-            }
-        }
-    }
-
-    private class Shooting : ActionState
-    {
-
-        ActionState prev;
-
-        public Shooting(PlayerController controller, ActionState prev) : base(controller)
-        {
-            this.prev = prev;
-        }
-
-        public override void Enter()
-        {
-            //Play the animation, spawn the projectile, and then exit.
-        }
-
-        public override void Exit()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void FixedUpdate()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void Update()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override string Type
-        {
-            get
-            {
-                return "Shooting";
             }
         }
     }

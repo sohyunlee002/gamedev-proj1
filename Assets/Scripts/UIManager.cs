@@ -136,12 +136,14 @@ public class UIManager : MonoBehaviour {
         SetDigits(LoadingLivesDigit, playerLives);
         if (playerLives == 0)
         {
+            print("load menu");
             //Do game over scene and back to Menu Scene?
             SceneManager.LoadScene("Menu Scene");
             playerLives = 3;
         }
         else
         {
+            print("reloading!");
             LoadScene();
         }
     }

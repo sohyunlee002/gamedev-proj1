@@ -115,7 +115,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 20362340}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 2.15, y: 1.49, z: 0}
+  m_LocalPosition: {x: 1.94, y: 1.49, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1196705384}
@@ -2240,7 +2240,6 @@ GameObject:
   - component: {fileID: 1196705389}
   - component: {fileID: 1196705388}
   - component: {fileID: 1196705387}
-  - component: {fileID: 1196705386}
   m_Layer: 12
   m_Name: Super Mario
   m_TagString: Player
@@ -2313,22 +2312,6 @@ Animator:
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
---- !u!114 &1196705386
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1196705382}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bfb0c9f54cb2a5f46bf666840376d478, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  anim: {fileID: 0}
-  jumpForce: 750
-  whatIsGround:
-    serializedVersion: 2
-    m_Bits: 256
 --- !u!58 &1196705387
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -2599,7 +2582,6 @@ GameObject:
   - component: {fileID: 1451007502}
   - component: {fileID: 1451007501}
   - component: {fileID: 1451007505}
-  - component: {fileID: 1451007504}
   m_Layer: 12
   m_Name: Little Mario
   m_TagString: Player
@@ -2665,22 +2647,6 @@ Animator:
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
---- !u!114 &1451007504
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1451007499}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bfb0c9f54cb2a5f46bf666840376d478, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  anim: {fileID: 0}
-  jumpForce: 750
-  whatIsGround:
-    serializedVersion: 2
-    m_Bits: 256
 --- !u!58 &1451007505
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -3072,7 +3038,6 @@ GameObject:
   - component: {fileID: 1742456790}
   - component: {fileID: 1742456786}
   - component: {fileID: 1742456785}
-  - component: {fileID: 1742456787}
   m_Layer: 12
   m_Name: Ducking Mario
   m_TagString: Player
@@ -3121,17 +3086,6 @@ CircleCollider2D:
   m_Offset: {x: 0, y: -0.68}
   serializedVersion: 2
   m_Radius: 0.33
---- !u!114 &1742456787
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1742456783}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a4dcd55908262a439a77fdba6aa7933, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!212 &1742456790
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -3268,7 +3222,7 @@ Prefab:
     m_Modifications:
     - target: {fileID: 4717040501300178, guid: 852ff4a4d2f2fd14b99a2b01baf8df3b, type: 2}
       propertyPath: m_LocalPosition.x
-      value: 16
+      value: 23.48
       objectReference: {fileID: 0}
     - target: {fileID: 4717040501300178, guid: 852ff4a4d2f2fd14b99a2b01baf8df3b, type: 2}
       propertyPath: m_LocalPosition.y
