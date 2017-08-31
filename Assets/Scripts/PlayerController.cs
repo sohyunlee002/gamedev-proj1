@@ -46,6 +46,9 @@ public class PlayerController : MonoBehaviour {
     GameObject superMarioGO;
     GameObject duckingMarioGO;
 
+    int playerLayer = 12;
+    int playerInvincibleLayer = 14;
+
     // Use this for initialization
     void Start () {
         marioGO = GameObject.Find("Little Mario");
@@ -130,10 +133,20 @@ public class PlayerController : MonoBehaviour {
     IEnumerator Invulnerable() {
         marioState.Enter();
         playerHit = true;
-        rb.velocity = Vector3.zero;
-        rb.isKinematic = true;
+
+        marioGO.layer = playerInvincibleLayer;
+        superMarioGO.layer = playerInvincibleLayer;
+        duckingMarioGO.layer = playerInvincibleLayer;
+
+        //rb.velocity = Vector3.zero;
+        //rb.isKinematic = true;
         yield return new WaitForSeconds(1);
-        rb.isKinematic = false;
+        //rb.isKinematic = false;
+
+        marioGO.layer = playerLayer;
+        superMarioGO.layer = playerLayer;
+        duckingMarioGO.layer = playerLayer;
+
         playerHit = false;
     }
 
