@@ -24,7 +24,7 @@ This document is split into two parts: [documentation](#game-documentation) and 
 
 The following documentation outlines the various objects and systems used for the project. We highly encourage reading over these to understand how things work and how to add your own items and enemies. Documentation is provided for your reference and most of the things listed will not need to be modified by you. 
 
-The [specifications](#project-specifications).  are at the bottom of the page and list the things you need to do as well as some pointers on where to get started. The specifications must all be completed to get full credit on this project.
+The [specifications](#project-specifications) are at the bottom of the page and list the things you need to do as well as some pointers on where to get started. The specifications must all be completed to get full credit on this project.
 
 ## Game Documentation
 ### The Mario GameObject
