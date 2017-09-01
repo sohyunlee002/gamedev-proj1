@@ -20,11 +20,11 @@ Note: For now you can create your own repositories. We will give further instruc
 10. Push the skeleton code to the origin: ``git push origin master``
 11. You're ready to go!
 
-This document is split into two parts: documentation and [specifications](#project-specifications). 
+This document is split into two parts: [documentation](#game-documentation) and [specifications](#project-specifications). 
 
 The following documentation outlines the various objects and systems used for the project. We highly encourage reading over these to understand how things work and how to add your own items and enemies. Documentation is provided for your reference and most of the things listed will not need to be modified by you. 
 
-The specifications are at the bottom of the page and list the things you need to do as well as some pointers on where to get started. The specifications must all be completed to get full credit on this project.
+The [specifications](#project-specifications).  are at the bottom of the page and list the things you need to do as well as some pointers on where to get started. The specifications must all be completed to get full credit on this project.
 
 ## Game Documentation
 ### The Mario GameObject
