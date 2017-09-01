@@ -12,14 +12,21 @@ In this project, you will extend our simple 2D platformer with new abilities, it
 4. Pull often for bug fixes!
 5. Stage the skeleton code in your local repository: ``git add -A``
 6. Commit the skeleton code: ``git commit -m "Initial commit"``
+
+Note: For now you can create your own repositories. We will give further instructions on using our new gamedev github which we are working on getting set up. 
 7. Create a repository in the **berkeley-gamedev** organization
 8. Add your project partner as as collaborator
 9. Add your remote repository as the origin: ``git remote add origin "your-repo-address-here"``
 10. Push the skeleton code to the origin: ``git push origin master``
 11. You're ready to go!
 
+This document is split into two parts: documentation and [specifications](#project-specifications). 
+
+The following documentation outlines the various objects and systems used for the project. We highly encourage reading over these to understand how things work and how to add your own items and enemies. Documentation is provided for your reference and most of the things listed will not need to be modified by you. 
+
+The specifications are at the bottom of the page and list the things you need to do as well as some pointers on where to get started. The specifications must all be completed to get full credit on this project.
+
 ## Game Documentation
-	
 ### The Mario GameObject
 
 The scripts and components that make up the player character in our game are all encapsulated in the **MarioHolder**. This shows the capability of GameObjects to simply act as organizational tools for the objects in your game. More than just organizational, however, the parent GameObject serves another important purpose: to keep all Mario objects in the same location - as the position of a child GameObject is relative to the position of the parent GameObject. In this way, we can move the player character by moving MarioHolder's Transform but keeping the Transforms of **Little Mario**, **Super Mario**, and **Ducking Mario** set to (0, 0, 0).
@@ -112,7 +119,7 @@ The UI Manager is a [Singleton](http://gameprogrammingpatterns.com/singleton.htm
 
 The UI Manager keeps track of important UI and game functions such as keeping score, keeping time, and keeping track of the player's lives. It uses a coroutine to keep time - but one that waits for one second between calls rather than between fixed time steps of the phyiscs engine. Loading the game scene (switching between the Main Menu and the Game Scene) would normally be implemented with [``SceneManager.LoadScene("Main Scene")``](https://docs.unity3d.com/ScriptReference/SceneManagement.SceneManager.LoadScene.html) but we've abstracted it with ``UIManager.LoadScene`` to make sure that some time is spent on the Loading Screen by using a coroutine timer. The Menu Scene can be loaded normally. ``LoadOnClick`` calls this method in the ``LoadOnClick.LoadScene`` function, which, rather than being a Script component on a GameObject, is tied to the UI through the **Button** component on the **1Player** GameObject, which registers the **On Click** event. 
 
-## Project Specification
+## Project Specifications
 
 ### Part 1
 
