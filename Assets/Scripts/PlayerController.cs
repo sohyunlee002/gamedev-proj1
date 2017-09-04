@@ -14,14 +14,19 @@ public class PlayerController : MonoBehaviour {
     //The action that Mario is currently performing.
     public ActionState myState;
     //The form that Mario is currently in.
-    public Mario marioState;
+    public MarioForm marioForm;
     //The animator on the form that Mario is currently in.
     public Animator anim;
 
     //Little Mario
-    public Mario mario;
+    public MarioForm mario;
     //Super Mario
-    public SuperMario superMario;
+    public SuperMarioForm superMario;
+
+    GameObject marioGO;
+    GameObject superMarioGO;
+    GameObject duckingMarioGO;
+
     //Walking state
     ActionState walking;
     //Jumping state
@@ -42,9 +47,6 @@ public class PlayerController : MonoBehaviour {
     bool facingRight = true;
     bool playerHit = false;
     Rigidbody2D rb;
-    GameObject marioGO;
-    GameObject superMarioGO;
-    GameObject duckingMarioGO;
 
     int playerLayer = 12;
     int playerInvincibleLayer = 14;
@@ -59,8 +61,8 @@ public class PlayerController : MonoBehaviour {
         rb.freezeRotation = true;
         //anim = this.gameObject.GetComponent<Animator>();
         //Initialize states
-        mario = new Mario(this, marioGO);
-        superMario = new SuperMario(this, superMarioGO, mario);
+        mario = new MarioForm(this, marioGO);
+        superMario = new SuperMarioForm(this, superMarioGO, mario);
 
         /*walking = new Walking(this);
         jumping = new Jumping(this);
@@ -69,8 +71,8 @@ public class PlayerController : MonoBehaviour {
 
         //Set initial states
         myState = new Walking(this);
-        marioState = mario;
-        marioState.Enter();
+        marioForm = mario;
+        marioForm.Enter();
         //Always start in Little Mario
         duckingMarioGO.SetActive(false);
         superMarioGO.SetActive(false);
@@ -110,16 +112,20 @@ public class PlayerController : MonoBehaviour {
         myState.Enter();
     }
 
-    public void Grow(Mario nextMario)
+    public void Grow(MarioForm nextMario)
     {
-        marioState = marioState.Exit(nextMario);
-        marioState.Enter();
+        marioForm = marioForm.Exit(nextMario);
+        marioForm.Enter();
     }
 
     public void Shrink()
     {
-        marioState = marioState.Exit(marioState.prevMario);
-        if (marioState == null)
+        if (marioForm != null)
+        {
+            marioForm = marioForm.Exit(marioForm.prevMario);
+        }
+       
+        if (marioForm == null)
         {
             uiManager.TakeLife();
             gameObject.SetActive(false);
@@ -131,7 +137,7 @@ public class PlayerController : MonoBehaviour {
     }
 
     IEnumerator Invulnerable() {
-        marioState.Enter();
+        marioForm.Enter();
         playerHit = true;
 
         marioGO.layer = playerInvincibleLayer;
@@ -161,7 +167,7 @@ public class PlayerController : MonoBehaviour {
 
     bool CheckForGround()
     {
-        SpriteRenderer mySprite = marioState.gameObject.GetComponent<SpriteRenderer>();
+        SpriteRenderer mySprite = marioForm.gameObject.GetComponent<SpriteRenderer>();
         float castHeight = mySprite.sprite.bounds.size.y / 2 + 0.25f;
         Vector3 origin = new Vector3(transform.position.x, transform.position.y);
         RaycastHit2D hit = Physics2D.Raycast(origin, Vector3.down, castHeight, whatIsGround);
@@ -228,9 +234,9 @@ public class PlayerController : MonoBehaviour {
                 controller.TransitionActionState(new Jumping(controller));
             }
             else if (Input.GetAxis("Vertical") < lastFrameVertical && Input.GetAxis("Vertical") <= -0.01f 
-                && controller.marioState.CanDuck())
+                && controller.marioForm.CanDuck())
             {
-                controller.TransitionActionState(new Ducking(controller, controller.marioState.gameObject));
+                controller.TransitionActionState(new Ducking(controller, controller.marioForm.gameObject));
             }
             lastFrameVertical = Input.GetAxis("Vertical");
         }
