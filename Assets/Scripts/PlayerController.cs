@@ -19,9 +19,9 @@ public class PlayerController : MonoBehaviour {
     public Animator anim;
 
     //Little Mario
-    public MarioForm mario;
+    public MarioForm littleMarioForm;
     //Super Mario
-    public SuperMarioForm superMario;
+    public SuperMarioForm superMarioForm;
 
     GameObject marioGO;
     GameObject superMarioGO;
@@ -61,8 +61,8 @@ public class PlayerController : MonoBehaviour {
         rb.freezeRotation = true;
         //anim = this.gameObject.GetComponent<Animator>();
         //Initialize states
-        mario = new MarioForm(this, marioGO);
-        superMario = new SuperMarioForm(this, superMarioGO, mario);
+        littleMarioForm = new MarioForm(this, marioGO);
+        superMarioForm = new SuperMarioForm(this, superMarioGO, littleMarioForm);
 
         /*walking = new Walking(this);
         jumping = new Jumping(this);
@@ -71,7 +71,7 @@ public class PlayerController : MonoBehaviour {
 
         //Set initial states
         myState = new Walking(this);
-        marioForm = mario;
+        marioForm = littleMarioForm;
         marioForm.Enter();
         //Always start in Little Mario
         duckingMarioGO.SetActive(false);

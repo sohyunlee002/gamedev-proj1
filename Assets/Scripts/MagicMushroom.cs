@@ -62,7 +62,7 @@ public class MagicMushroom : Item {
         {
             pickedUp = true;
         }
-        player.Grow(player.superMario);
+        player.Grow(player.superMarioForm);
         Destroy(gameObject);
     }
 
