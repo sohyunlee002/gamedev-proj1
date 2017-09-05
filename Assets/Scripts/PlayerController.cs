@@ -144,10 +144,7 @@ public class PlayerController : MonoBehaviour {
         superMarioGO.layer = playerInvincibleLayer;
         duckingMarioGO.layer = playerInvincibleLayer;
 
-        //rb.velocity = Vector3.zero;
-        //rb.isKinematic = true;
         yield return new WaitForSeconds(1);
-        //rb.isKinematic = false;
 
         marioGO.layer = playerLayer;
         superMarioGO.layer = playerLayer;
@@ -209,8 +206,6 @@ public class PlayerController : MonoBehaviour {
     {
 
         float lastFrameVertical;
-        float lastFrameHorizontal;
-        float lastFrameVelocity;
 
         public Walking(PlayerController controller) : base(controller)
         {
