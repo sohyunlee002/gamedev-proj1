@@ -3,11 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour {
-
-    /*Keep all the animators on the parent gameObject? 
-    * And then the children just hold the colliders
-    */
+public class PlayerController : MonoBehaviour {a
 
     UIManager uiManager;
 
@@ -15,33 +11,29 @@ public class PlayerController : MonoBehaviour {
     public ActionState myState;
     //The form that Mario is currently in.
     public MarioForm marioForm;
-    //The animator on the form that Mario is currently in.
+    //The animator of the form that Mario is currently in (on the form's
+    //associated GameObject and set by MarioForm)
     public Animator anim;
 
+    //References to the two Mario forms. 
     //Little Mario
     public MarioForm littleMarioForm;
     //Super Mario
     public SuperMarioForm superMarioForm;
 
+    //The GameObjects on the MarioHolder.
     GameObject marioGO;
     GameObject superMarioGO;
     GameObject duckingMarioGO;
 
-    //Walking state
-    ActionState walking;
-    //Jumping state
-    ActionState jumping;
-    //InAir state
-    ActionState inAir;
-    //Ducking state
-    ActionState ducking;
-
+    //These vars to be set in the editor. 
+    public float jumpForce = 750;
+    public LayerMask whatIsGround;
+    
     float groundAcceleration = 15;
     float airHorizAcceleration = 5;
     float airJumpAcceleration = 18;
     float maxSpeed = 7.5f;
-    public float jumpForce = 750;
-    public LayerMask whatIsGround;
     float moveX;
     float moveJump;
     bool facingRight = true;
@@ -59,17 +51,10 @@ public class PlayerController : MonoBehaviour {
         uiManager = UIManager.uiManager;
         rb = gameObject.GetComponent<Rigidbody2D>();
         rb.freezeRotation = true;
-        //anim = this.gameObject.GetComponent<Animator>();
-        //Initialize states
+        //Initialize Mario forms
         littleMarioForm = new MarioForm(this, marioGO);
         superMarioForm = new SuperMarioForm(this, superMarioGO, littleMarioForm);
-
-        /*walking = new Walking(this);
-        jumping = new Jumping(this);
-        inAir = new InAir(this);
-        ducking = new Ducking(this);*/
-
-        //Set initial states
+        //Set initial form and action state
         myState = new Walking(this);
         marioForm = littleMarioForm;
         marioForm.Enter();
@@ -82,6 +67,7 @@ public class PlayerController : MonoBehaviour {
     void Update () {
         moveX = Input.GetAxis("Horizontal");
         moveJump = Input.GetAxis("Jump");
+	//Delegate to current action state
         myState.Update();
     }
 
@@ -98,6 +84,7 @@ public class PlayerController : MonoBehaviour {
         {
             Flip();
         }
+	//Delegate to current action state
         myState.FixedUpdate();
         if (gameObject.transform.localPosition.y < -1) {
             uiManager.TakeLife();
@@ -105,6 +92,8 @@ public class PlayerController : MonoBehaviour {
         }
     }
 
+    //Transition between action states. Called from the current action
+    //state with the state to transtition to as the argument.
     void TransitionActionState(ActionState nextState)
     {
         myState.Exit();
@@ -112,6 +101,8 @@ public class PlayerController : MonoBehaviour {
         myState.Enter();
     }
 
+    //Transition to the next Mario form. Called by the Item with which the
+    //player collides, with the next Mario form as the argument.
     public void Grow(MarioForm nextMario)
     {
         marioForm = marioForm.Exit(nextMario);
@@ -172,7 +163,6 @@ public class PlayerController : MonoBehaviour {
         return hit.collider != null;
     }
 
-    //Adapter pattern here
     public void OnCollisionEnter2D(Collision2D coll) {
         switch (LayerMask.LayerToName(coll.gameObject.layer))
         {
@@ -252,10 +242,6 @@ public class PlayerController : MonoBehaviour {
 
         public override void Exit()
         {
-            /*Determine the animation state. */
-            //This is why we need a "Walking" Animation state!
-            //Walking won't always lead to Jumping - you could be 
-            //shooting, or ducking!
             controller.anim.SetBool("Grounded", false);
         }
 
@@ -297,12 +283,6 @@ public class PlayerController : MonoBehaviour {
             }
         }
 
-        public override void Update()
-        {
-            controller.moveJump = Input.GetAxis("Jump");
-            controller.moveX = Input.GetAxis("Horizontal");
-        }
-
         public override string Type
         {
             get
@@ -313,7 +293,7 @@ public class PlayerController : MonoBehaviour {
 
     }
 
-    private class Jumping : InAir
+    private class Jumping : ActionState
     {
 
         float jumpingTime;
@@ -332,16 +312,19 @@ public class PlayerController : MonoBehaviour {
             controller.anim.SetBool("Jumping", true);
         }
 
+	public override void Update()
+        {
+            controller.moveJump = Input.GetAxis("Jump");
+            controller.moveX = Input.GetAxis("Horizontal");
+        }
+	
         public override void FixedUpdate()
         {
-            //base.FixedUpdate();
-            //Jumping timer
             if (Mathf.Abs(controller.rb.velocity.x) <= controller.maxSpeed)
             {
                 controller.rb.AddForce(new Vector3(controller.moveX * controller.airHorizAcceleration, 0));
             }
             jumpingTime -= Time.deltaTime;
-            //Control in the air
             if (jumpingTime >= 0)
             {
                 controller.rb.AddForce(new Vector3(0, controller.moveJump * controller.airJumpAcceleration));
@@ -405,8 +388,7 @@ public class PlayerController : MonoBehaviour {
         {
             if (Input.GetButtonUp("Vertical"))
             {
-                //You can only duck when you're on the ground.
-                controller.TransitionActionState(new Walking(controller));
+                  controller.TransitionActionState(new Walking(controller));
             }
         }
 

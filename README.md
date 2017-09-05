@@ -15,10 +15,12 @@ In this project, you will extend our simple 2D platformer with new abilities, it
 
 Note: For now you can create your own repositories. We will give further instructions on using our new gamedev github which we are working on getting set up. 
 1. Create a repository in the **berkeley-gamedev** organization
-2. Add your project partner as as collaborator
+2. Add your project partner as a collaborator
 3. Add your remote repository as the origin: ``git remote add origin "your-repo-address-here"``
 4. Push the skeleton code to the origin: ``git push origin master``
 5. You're ready to go!
+
+In-editor setup: In the project pane, drag the two scenes in ``Assets/Scenes/`` into the Hierarchy (the leftmost pane). That's it! Now you should be able to play the game on pressing "Play". 
 
 This document is split into two parts: [documentation](#game-documentation) and [specifications](#project-specifications). 
 
@@ -30,7 +32,7 @@ The [specifications](#project-specifications) are at the bottom of the page and 
 
 ### The Mario GameObject
 
-The scripts and components that make up the player character in our game are all encapsulated in the **MarioHolder**. This shows the capability of GameObjects to simply act as organizational tools for the objects in your game. More than just organizational, however, the parent GameObject serves another important purpose: to keep all Mario objects in the same location - as the position of a child GameObject is relative to the position of the parent GameObject. In this way, we can move the player character by moving MarioHolder's Transform but keeping the Transforms of **Little Mario**, **Super Mario**, and **Ducking Mario** set to (0, 0, 0).
+The scripts and components that make up the player character in our game are all encapsulated in the **MarioHolder**. This shows the capability of GameObjects to simply act as organizational tools for the objects in your scene. More than just organizational, however, the parent GameObject serves another important purpose: to keep all Mario objects in the same location - as the position of a child GameObject is relative to the position of the parent GameObject. In this way, we can move the player character by moving MarioHolder's Transform but keeping the Transforms of **Little Mario**, **Super Mario**, and **Ducking Mario** set to (0, 0, 0). MarioHolder is moved by applying force to its ``RigidBody2D`` with the ``RigidBody2D.AddForce(Vector3 force)`` function. Since only one Mario form will be active at a time, we can use a single ``RigidBody2D`` on the parent ``MarioHolder`` rather than distribute many ``RigidBodies`` among the child GameObjects. Using a single ``RigidBody`` will free us from passing around references to different ``RigidBodies`` and certainly decrease the load on the physics engine. 
 
 Super Mario and Little Mario correspond to the different forms that Mario can take on in the game. Ducking Mario is associated with an ActionState instead and its existence is just a quirk of the implementation. We'll get to this later. Little Mario will begin the game, and upon eating a Magic Mushroom will turn into Super Mario. In order to switch between these different Mario bodies, we use the logic in the Player Controller to [activate](https://unity3d.com/learn/tutorials/topics/scripting/activating-gameobjects) the new Mario GameObject, and deactivate the old Mario GameObject with ``gameObject.SetActive(Boolean bool)``. When a GameObject is deactivated, it is temporarily removed from the scene. 
 
@@ -38,11 +40,11 @@ Each Mario GameObject has a Transform, a Sprite Renderer, an Animator, several g
 
 #### Mario "Forms"
 
-The classes ``MarioForm`` and ``SuperMarioForm``, which inherits from ``MarioForm`` do NOT inherit ``Monobehaviour`` and therefore cannot be attached as components to GameObjects in the scene. They simply encapsulate the game logic for the Mario forms. Their properties are the PlayerController, their associated GameObject (that they will activate on ``Enter`` and deactivate on ``Exit``), and the MarioForm that they will transition to when they "shrink" (hit by an enemy). In this case ``MarioForm`` will become ``null`` (signalling that Mario has lost a life) and ``SuperMarioForm`` will shrink to Little Mario. 
+The classes ``MarioForm`` and its subclass``SuperMarioForm`` do NOT inherit from ``Monobehaviour`` and therefore cannot be attached as components to GameObjects in the scene. They simply encapsulate the game logic for the Mario forms. Their properties are the PlayerController, their associated GameObject (that they will activate on ``Enter`` and deactivate on ``Exit``), and the MarioForm that they will transition to when they "shrink". In this case ``MarioForm`` will become ``null`` (signalling that Mario has lost a life) and ``SuperMarioForm`` will shrink to Little Mario. The ``Shrink`` and ``Grow`` functions are analogous to ``TransitionActionState`` in that they transition between different Mario states: "shrinking" Mario when he is hit by an enemy, or "growing" him into the next Mario state as dictated by an Item. 
 
 ### PlayerController
 
-We've covered the basics of scripting in class. The ``Start()`` function is called on initialization, ``Update()`` is called once per frame and is best for catching input, and ``FixedUpdate()`` is called on a fixed interval and is best for phyiscs updates. The Player Controller uses a [State Machine](http://gameprogrammingpatterns.com/state.html) to intercept the input and carry out actions based on what state Mario is in, so the ``Update`` function simply has to get the input and delegate it to the state. The ``FixedUpdate`` function handles flipping the player character left and right, delegates to the current state, and handles the transitions between states.
+We've covered the basics of scripting in class. The ``Start()`` function is called on initialization, ``Update()`` is called once per frame and is best for catching input, and ``FixedUpdate()`` is called on a fixed interval and is best for phyiscs updates. The Player Controller uses a [State Machine](http://gameprogrammingpatterns.com/state.html) to intercept the input and carry out actions based on what action state Mario is in, so the ``Update`` function simply has to get the input and delegate it to the state. The ``FixedUpdate`` function handles flipping the player character left and right, and delegates the rest of the input actions to the current action state.
 
 A State Machine is a "machine" that can be in one state at a time. It transitions between states in response to external inputs: in our case either Mario's movements in the game, or input from the player.
 
@@ -54,7 +56,8 @@ The PlayerState interface dictates the functions that a state must implement:
 * ``FixedUpdate`` to be called by ``PlayerController.FixedUpdate`` on a fixed timescale for physics updates  
 * ``Update`` to be called by ``PlayerController.Update`` per frame  
 * ``Exit`` to called by ``PlayerController.FixedUpdate`` when the player character leaves the state  
-* ``HandleInput`` to be called by ``PlayerController.Update`` when an input is received and to return the next state that the current state that Mario will transition to  
+
+When an ActionState wants to transition to a new state, it calls ``PlayerController.TransitionActionState(ActionState nextState)`` with ``nextState`` as the state that it wants to transition to. This function will call the ``Exit`` function of the current state, update the ``myState`` variable, and then call the ``Enter`` function of the next state.
 
 ##### Walking
 
@@ -66,7 +69,7 @@ The ``InAir`` state does many of the same things as the Grounded state. In its `
 
 ##### Jumping
 
-``Jumping`` inherits from the ``InAir`` class to inherit the same horizontal movement and checking for ground capabilites. On entrance, the Jumping state will apply the preliminary jumping force and activate the Jumping animation. In its ``FixedUpdate``, it will continue to add force as the player holds down the Jump button as long as Mario has not exceeded its maximum speed or the allotted time to add jumping force (``jumpingTime`` = 1 second). When Mario reaches the apex of his jump and begins falling, Mario will transition to the InAir state. 
+On entrance, the Jumping state will apply the preliminary jumping force and activate the Jumping animation. In its ``FixedUpdate``, it will continue to add force as the player holds down the Jump button as long as Mario has not exceeded its maximum speed or the allotted time to add jumping force (``jumpingTime`` = 1 second). When Mario reaches the apex of his jump and begins falling, Mario will transition to the InAir state. 
 
 ##### Ducking
 
@@ -92,11 +95,11 @@ The **Mystery Block** object is functionally identical to the Basic Block.
 
 #### Script
 
-a``MysteryBlock`` inherits from the ``Block`` class so it has many of the same behaviors. However, after a Mystery Block is bounced up and down by the player it becomes unbreakable. This is implemented with a coroutine that simply calls the ``MoveUpAndDown`` coroutine that it inherits and then changes the sprite and makes the block unbreakable on completion.
+``MysteryBlock`` inherits from the ``Block`` class so it has many of the same behaviors. However, after a Mystery Block is bounced up and down by the player it becomes unbreakable. This is implemented with a coroutine that simply calls the ``MoveUpAndDown`` coroutine that it inherits and then changes the sprite and makes the block unbreakable on completion.
 
 ### Goombas
 
-The **Goomba** is an agent in the world and therefore has a ``Rigidbody`` component. The colliders are once again separated into different GameObjects so we can more easily check whether Mario has bounced on top of the Goomba to kill it, or the Goomba has hit Mario on the side. 
+The **Goomba** is an agent in the world and therefore has a ``Rigidbody`` component like Mario. The colliders are once again separated into different GameObjects so we can more easily check whether Mario has bounced on top of the Goomba to kill it, or the Goomba has hit Mario on the side. 
 
 #### Script
 
