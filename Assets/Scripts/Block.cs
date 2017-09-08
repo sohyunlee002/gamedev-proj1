@@ -36,7 +36,6 @@ public class Block : MonoBehaviour {
     {
         if (player.name == "Super Mario")
         {
-            //Play animation for breaking here.
             transform.parent.gameObject.SetActive(false);
         }
         else

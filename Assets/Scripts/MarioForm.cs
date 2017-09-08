@@ -14,8 +14,6 @@ public class MarioForm
     {
         this.controller = controller;
         this.gameObject = gameObject;
-        //Is it best to do these things in the constructor? 
-        //Or just add an Enter() function and call it each time.
         this.prevMario = prevMario;
     }
 

@@ -20,7 +20,6 @@ public class LoadOnClick : MonoBehaviour {
         UI_Canvas = GameObject.Find("UI_Canvas");
         Title_Screen = GameObject.Find("Title Screen");
         DontDestroyOnLoad(UI_Canvas);
-        //UI_Canvas.SetActive(false);
     }
 
     public void LoadScene()
