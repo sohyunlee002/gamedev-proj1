@@ -20,11 +20,14 @@ public class PlayerController : MonoBehaviour {
     public MarioForm littleMarioForm;
     //Super Mario
     public SuperMarioForm superMarioForm;
+	//Magic Mario
+	public MagicalMarioForm magicMarioForm;
 
     //The GameObjects on the MarioHolder.
     GameObject marioGO;
     GameObject superMarioGO;
     GameObject duckingMarioGO;
+	GameObject magicalMarioGO;
 
     //These vars to be set in the editor. 
     public float jumpForce = 750;
@@ -48,12 +51,14 @@ public class PlayerController : MonoBehaviour {
         marioGO = GameObject.Find("Little Mario");
         superMarioGO = GameObject.Find("Super Mario");
         duckingMarioGO = GameObject.Find("Ducking Mario");
+		magicalMarioGO = GameObject.Find ("Magical Mario");
         uiManager = UIManager.uiManager;
         rb = gameObject.GetComponent<Rigidbody2D>();
         rb.freezeRotation = true;
         //Initialize Mario forms
         littleMarioForm = new MarioForm(this, marioGO);
         superMarioForm = new SuperMarioForm(this, superMarioGO, littleMarioForm);
+		magicMarioForm = new MagicalMarioForm (this, magicalMarioGO, littleMarioForm);
         //Set initial form and action state
         myState = new Walking(this);
         marioForm = littleMarioForm;
