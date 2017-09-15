@@ -64,6 +64,7 @@ public class PlayerController : MonoBehaviour {
         marioForm = littleMarioForm;
         marioForm.Enter();
         //Always start in Little Mario
+        magicalMarioGO.SetActive(false);
         duckingMarioGO.SetActive(false);
         superMarioGO.SetActive(false);
     }
