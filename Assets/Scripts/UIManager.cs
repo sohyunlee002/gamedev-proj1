@@ -18,7 +18,11 @@ public class UIManager : MonoBehaviour {
     List<Image> CoinsDigits = new List<Image>();
     GameObject Timer;
     List<Image> TimerDigits = new List<Image>();
+    //Change to LivesDigits afterwards
     List<Image> LoadingLivesDigit = new List<Image>();
+    GameObject Lives_Counter;
+    List<Image> LivesDigits = new List<Image>();
+    Image Lives;
     string pathToSprites = "NES - Super Mario Bros - Font(Transparent)";
     public Object assetTest;
     Sprite[] numberSprites;
@@ -59,9 +63,15 @@ public class UIManager : MonoBehaviour {
         {
             TimerDigits.Add(child.GetComponent<Image>());
         }
+        Lives_Counter = GameObject.Find("Lives_Counter");
+        foreach (Transform child in Lives_Counter.transform)
+        {
+            LivesDigits.Add(child.GetComponent<Image>());
+        }
         SetDigits(ScoreDigits, playerScore);
         SetDigits(CoinsDigits, playerCoins);
         SetDigits(TimerDigits, playerTime);
+        SetDigits(LivesDigits, playerLives);
         SetDigits(LoadingLivesDigit, playerLives);
         LoadingBackground.SetActive(false);
     }
@@ -134,6 +144,7 @@ public class UIManager : MonoBehaviour {
     public void TakeLife() {
         playerLives -= 1;
         SetDigits(LoadingLivesDigit, playerLives);
+        SetDigits(LivesDigits, playerLives);
         if (playerLives == 0)
         {
             SceneManager.LoadScene("Menu Scene");
